@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('weaknesses', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('parsed_data_id')->constrained('parsed_data')->onDelete('cascade');
-            $table->string('description');
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('api_token', 80)->after('password')
+                ->unique()
+                ->nullable()
+                ->default(null);
         });
     }
 
@@ -24,6 +24,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('weaknesses');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('api_token');
+        });
     }
 };

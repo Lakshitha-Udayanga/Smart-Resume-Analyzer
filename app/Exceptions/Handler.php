@@ -2,16 +2,20 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
-    /**
-     * The list of the inputs that are never flashed to the session on validation exceptions.
-     *
-     * @var array<int, string>
-     */
+    protected function unauthenticated($request, \Illuminate\Auth\AuthenticationException $exception)
+    {
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+    }
+
+
     protected $dontFlash = [
         'current_password',
         'password',

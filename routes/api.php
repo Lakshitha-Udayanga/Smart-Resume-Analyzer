@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ResumeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Monolog\Registry;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,7 +18,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::post('/user/register', [RegisterController::class, 'store']);
+Route::middleware('auth:apiToken')->group(function () {
+    Route::post('/login', [LoginController::class, 'login']);
+    Route::post('/resume/upload', [ResumeController::class, 'upload']);
+    Route::get('/test/api', [LoginController::class, 'testFunction']);
 });
-Route::post('/resume/upload', [ResumeController::class, 'upload']);
