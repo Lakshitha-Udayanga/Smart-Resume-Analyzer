@@ -16,13 +16,11 @@ class ApiTokenAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $token = $request->bearerToken();
-        // $env_token = env('API_TOKEN');
-        $env_token = User::first()->api_token;
-        if (!$token || $token !== $env_token) {
+        $token = env('API_TOKEN');
+        if ($request->header('Authorization') !== 'Bearer ' . $token) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-
         return $next($request);
+
     }
 }

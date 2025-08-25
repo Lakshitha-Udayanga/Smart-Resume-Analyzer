@@ -12,7 +12,7 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         try {
-             $request->validate([
+            $request->validate([
                 'email'    => 'required|email',
                 'password' => 'required',
             ]);
@@ -32,9 +32,13 @@ class LoginController extends Controller
         }
     }
 
-    public function testFunction()
+    public function index()
     {
-        return 'dfdf';
+        $users = User::get();
+
+        return response()->json([
+            'users'  => $users,
+        ]);
     }
 
     public function create()
@@ -74,8 +78,29 @@ class LoginController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        try {
+            $user = User::find($id);
+
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found'
+                ], 404);
+            }
+
+            $user->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'User deleted successfully'
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 }

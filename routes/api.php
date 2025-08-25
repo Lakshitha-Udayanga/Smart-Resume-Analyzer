@@ -19,8 +19,9 @@ use Monolog\Registry;
 */
 
 Route::post('/user/register', [RegisterController::class, 'store']);
-Route::middleware('auth:apiToken')->group(function () {
+Route::middleware('auth.apiToken')->group(function () {
     Route::post('/login', [LoginController::class, 'login']);
+    Route::delete('/delete/user/{id}', [LoginController::class, 'destroy']);
     Route::post('/resume/upload', [ResumeController::class, 'upload']);
-    Route::get('/test/api', [LoginController::class, 'testFunction']);
+    Route::get('/users', [LoginController::class, 'index']);
 });
