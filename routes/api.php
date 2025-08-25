@@ -18,10 +18,11 @@ use Monolog\Registry;
 |
 */
 
-Route::post('/user/register', [RegisterController::class, 'store']);
 Route::middleware('auth.apiToken')->group(function () {
+    Route::post('/user/register', [RegisterController::class, 'store']);
+
     Route::post('/login', [LoginController::class, 'login']);
-    Route::delete('/delete/user/{id}', [LoginController::class, 'destroy']);
+    Route::get('/delete/user/{id}', [LoginController::class, 'destroy']);
     Route::post('/resume/upload', [ResumeController::class, 'upload']);
     Route::get('/users', [LoginController::class, 'index']);
 });
