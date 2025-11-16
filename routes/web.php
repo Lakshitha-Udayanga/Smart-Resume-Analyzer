@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ResumeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +17,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/ask-ollama', [ResumeController::class, 'askOllama']);
+
+
+// check pdf
+Route::get('/view-pdf', [ResumeController::class, 'viewIndexPdf']);
+Route::post('/pdf/summarize', [ResumeController::class, 'summarizePdf']);
+

@@ -10,6 +10,7 @@ use App\Models\Weakness;
 use App\Models\JobRecommendation;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
+use Smalot\PdfParser\Parser;
 
 class ResumeController extends Controller
 {
@@ -106,6 +107,80 @@ class ResumeController extends Controller
             'job_recommendations' => [],
         ];
     }
+
+    public function askOllama(Request $request)
+    {
+        $prompt = $request->input('prompt', 'who are you');
+
+        try {
+            $response = Http::timeout(120)->post('http://127.0.0.1:11434/api/generate', [
+                'model' => 'gemma3:4b', // your local model
+                'prompt' => $prompt,
+                'stream' => false
+            ]);
+
+            return response()->json($response->json());
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            return response()->json([
+                'error' => 'Ollama request failed',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function viewIndexPdf()
+    {
+        return view('test_pdf.pdf_upload');
+    }
+    public function summarizePdf(Request $request)
+    {
+        $request->validate([
+            'pdf' => 'required|mimes:pdf|max:10240',
+        ]);
+
+        // $pdf = $request->file('pdf');
+        // // Extract text from PDF
+        // $parser = new Parser();
+        // $pdfText = $parser->parseFile($pdf->getRealPath())->getText();
+        // $pdfText = substr($pdfText, 0, 4000); // adjust as needed
+        // Send to Ollama for summary
+        try {
+            // $response = Http::timeout(120)->post('http://127.0.0.1:11434/api/generate', [
+            //     'model' => 'gemma3:4b',
+            //     'prompt' => "Give me Skile the following document:\n\n$pdfText",
+            //     'stream' => false,
+            // ]);
+            // dd($response->json());
+
+            $parser = new Parser();
+            $pdfText = $parser->parseFile($request->file('pdf')->getRealPath())->getText();
+            // Split into smaller chunks
+            $chunks = str_split($pdfText, 100);
+            $summary = '';
+
+            foreach ($chunks as $chunk) {
+                $response = Http::timeout(300)->post('http://127.0.0.1:11434/api/generate', [
+                    'model' => 'gemma3:4b',
+                    'prompt' => "give me lebalize for Skile the follwing this text:\n\n$chunk",
+                    'stream' => false,
+                ]);
+
+                $summary .= $response->json()['text'] ?? '';
+                dd($response->json()['response'] );
+            }
+
+            return response()->json(['summary' => $summary]);
+
+
+            return response()->json($response->json());
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            return response()->json([
+                'error' => 'Ollama request failed',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
     public function create()
     {
