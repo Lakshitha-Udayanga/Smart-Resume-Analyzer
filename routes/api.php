@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ResumeController;
@@ -19,6 +21,11 @@ use Monolog\Registry;
 */
 
 Route::middleware('auth.apiToken')->group(function () {
+    //password reset
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
+    Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
+
+    //user register
     Route::post('/user/register', [RegisterController::class, 'store']);
 
     Route::post('/login', [LoginController::class, 'login']);

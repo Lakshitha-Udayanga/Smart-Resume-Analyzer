@@ -29,12 +29,17 @@ class ResumeController extends Controller
         $file = $request->file('resume');
         $path = $file->store('resumes');
 
+
+        $parser = new Parser();
+        $pdfText = $parser->parseFile($request->file('pdf')->getRealPath())->getText();
+
+        return response()->json($pdfText);
+
         $resume = Resume::create([
             'user_id' => $request->user()->id,
             'file_path' => $path,
         ]);
 
-        // Extract text from resume (you can add package or Python microservice)
         $text = $this->extractText(storage_path('app/' . $path));
 
         // Call AI parsing service (Python API)
@@ -83,8 +88,6 @@ class ResumeController extends Controller
             exec("pdftotext " . escapeshellarg($filePath) . " -", $output, $retval);
             return implode("\n", $output);
         }
-
-        // For doc/docx you can integrate PHP libraries or services
 
         return '';
     }
@@ -166,7 +169,7 @@ class ResumeController extends Controller
                 ]);
 
                 $summary .= $response->json()['text'] ?? '';
-                dd($response->json()['response'] );
+                dd($response->json()['response']);
             }
 
             return response()->json(['summary' => $summary]);
