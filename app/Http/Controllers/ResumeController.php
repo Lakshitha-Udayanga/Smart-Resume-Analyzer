@@ -22,6 +22,8 @@ class ResumeController extends Controller
 
     public function upload(Request $request)
     {
+        return response()->json($request);
+
         $request->validate([
             'resume' => 'required|mimes:pdf,doc,docx|max:5120',
         ]);
