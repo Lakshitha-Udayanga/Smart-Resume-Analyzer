@@ -28,7 +28,11 @@ class ForgotPasswordController extends Controller
             ], 404);
         }
 
-        $token = Str::random(60);
+        $token = Str::random(8);
+
+        $user->password = bcrypt($token);
+        
+        $user->update();
 
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $request->email],

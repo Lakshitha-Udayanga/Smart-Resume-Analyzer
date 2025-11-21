@@ -1,4 +1,5 @@
-<p>You requested a password reset.</p>
-<p>Use this token:</p>
+<p>Dear Sir/Madam</p>
+<p>You requested a password reset. Please use this temporary password..</p>
 <h2>{{ $token }}</h2>
-<p>Valid for 60 minutes.</p>
+<p>Valid for 30 minutes.</p>
+<p>Thank you.</p>
