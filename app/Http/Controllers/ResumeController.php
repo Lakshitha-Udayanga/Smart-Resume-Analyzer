@@ -22,14 +22,12 @@ class ResumeController extends Controller
 
     public function upload(Request $request)
     {
-        return response()->json($request);
-
         $request->validate([
-            'resume' => 'required|mimes:pdf,doc,docx|max:5120',
+            'pdf' => 'required|mimes:pdf,doc,docx|max:5120',
         ]);
 
-        $file = $request->file('resume');
-        $path = $file->store('resumes');
+        $file = $request->file('pdf');
+        $path = $file->store('pdf');
 
 
         $parser = new Parser();
