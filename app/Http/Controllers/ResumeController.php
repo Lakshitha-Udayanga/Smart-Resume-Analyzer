@@ -27,23 +27,20 @@ class ResumeController extends Controller
         ]);
 
         $file = $request->file('pdf');
+
         $path = $file->store('pdf');
 
-
         $parser = new Parser();
-        $pdfText = $parser->parseFile($request->file('pdf')->getRealPath())->getText();
 
-        return response()->json($pdfText);
+        $pdfText = $parser->parseFile($request->file('pdf')->getRealPath())->getText();
 
         $resume = Resume::create([
             'user_id' => $request->user()->id,
             'file_path' => $path,
         ]);
 
-        $text = $this->extractText(storage_path('app/' . $path));
-
         // Call AI parsing service (Python API)
-        $aiResult = $this->callAIService($text);
+        $aiResult = $this->callAIService($pdfText);
 
         // Save parsed data to DB
         $parsedData = ParsedData::create([
@@ -79,35 +76,41 @@ class ResumeController extends Controller
         ]);
     }
 
-    private function extractText($filePath)
-    {
-        // Basic example: use shell command 'pdftotext' for PDF files
-        if (str_ends_with($filePath, '.pdf')) {
-            $output = null;
-            $retval = null;
-            exec("pdftotext " . escapeshellarg($filePath) . " -", $output, $retval);
-            return implode("\n", $output);
-        }
-
-        return '';
-    }
-
     private function callAIService($text)
     {
-        // Call your Python Flask API or any AI microservice
-        $response = Http::post('http://localhost:5000/analyze', [
-            'text' => $text
+        $response = Http::timeout(300)->post('http://127.0.0.1:11434/api/generate', [
+            'model' => 'gemma3:4b',
+            'prompt' => "Analyze the following text and provide a JSON object with the following keys:
+                - skills: list of skills
+                - strengths: list of strengths
+                - weaknesses: list of weaknesses
+                - summary: a short summary of the text
+                - certificates: list of certificates if any
+                Text:
+                \"\"\"$text\"\"\"",
+            'stream' => false,
         ]);
 
         if ($response->successful()) {
-            return $response->json();
+            $result = $response->json();
+
+            $relevantLabels = [
+                'skills' => $result['skills'] ?? [],
+                'strengths' => $result['strengths'] ?? [],
+                'weaknesses' => $result['weaknesses'] ?? [],
+                'summary' => $result['summary'] ?? '',
+                'certificates' => $result['certificates'] ?? [],
+            ];
+
+            return $relevantLabels;
         }
 
         return [
-            'summary' => '',
+            'skills' => [],
             'strengths' => [],
             'weaknesses' => [],
-            'job_recommendations' => [],
+            'summary' => '',
+            'certificates' => [],
         ];
     }
 
@@ -160,20 +163,16 @@ class ResumeController extends Controller
             // Split into smaller chunks
             $chunks = str_split($pdfText, 100);
             $summary = '';
-
             foreach ($chunks as $chunk) {
                 $response = Http::timeout(300)->post('http://127.0.0.1:11434/api/generate', [
                     'model' => 'gemma3:4b',
                     'prompt' => "give me lebalize for Skile the follwing this text:\n\n$chunk",
                     'stream' => false,
                 ]);
-
                 $summary .= $response->json()['text'] ?? '';
                 dd($response->json()['response']);
             }
-
             return response()->json(['summary' => $summary]);
-
 
             return response()->json($response->json());
         } catch (\Illuminate\Http\Client\RequestException $e) {
@@ -183,7 +182,6 @@ class ResumeController extends Controller
             ], 500);
         }
     }
-
 
     public function create()
     {
