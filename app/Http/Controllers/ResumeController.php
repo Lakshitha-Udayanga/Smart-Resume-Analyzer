@@ -39,6 +39,8 @@ class ResumeController extends Controller
             'file_path' => $path,
         ]);
 
+        return response()->json($resume);
+
         // Call AI parsing service (Python API)
         $aiResult = $this->callAIService($pdfText);
 
