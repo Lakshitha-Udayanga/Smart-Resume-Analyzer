@@ -20,15 +20,20 @@ class ResumeController extends Controller
         //
     }
 
-    public function upload(Request $request)
+    public function upload(Request $request, $user_id)
     {
         $request->validate([
             'pdf' => 'required|mimes:pdf,doc,docx|max:5120',
         ]);
 
-        $file = $request->file('pdf');
+        $path = $request->file('pdf')->store('pdf', 'public');
 
-        $path = $file->store('pdf');
+        $url = asset('storage/' . $path);
+
+        $resume = Resume::create([
+            'user_id' => $user_id,
+            'file_path' => $url,
+        ]);
 
         $parser = new Parser();
 
