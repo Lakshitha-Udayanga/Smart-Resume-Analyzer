@@ -35,16 +35,11 @@ class ResumeController extends Controller
             'file_path' => $url,
         ]);
 
+        return response()->json($resume);
+
         $parser = new Parser();
 
         $pdfText = $parser->parseFile($request->file('pdf')->getRealPath())->getText();
-
-        $resume = Resume::create([
-            'user_id' => $request->user()->id,
-            'file_path' => $path,
-        ]);
-
-        return response()->json($resume);
 
         // Call AI parsing service (Python API)
         $aiResult = $this->callAIService($pdfText);
