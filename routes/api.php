@@ -30,6 +30,6 @@ Route::middleware('auth.apiToken')->group(function () {
 
     Route::post('/login', [LoginController::class, 'login']);
     Route::get('/delete/user/{id}', [LoginController::class, 'destroy']);
-    Route::post('/resume/upload/{user_id }', [ResumeController::class, 'upload']);
+    Route::post('/resume/upload/{user_id}', [ResumeController::class, 'upload']);
     Route::get('/users', [LoginController::class, 'index']);
 });
