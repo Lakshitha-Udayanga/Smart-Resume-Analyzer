@@ -3,6 +3,10 @@
 use App\Http\Controllers\ResumeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ClientListController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\JobsListController;
+use App\Http\Controllers\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,8 +30,11 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
 
-    Route::get('/ask-ollama', [ResumeController::class, 'askOllama']);
-    // check pdf
-    Route::get('/view-pdf', [ResumeController::class, 'viewIndexPdf']);
-    Route::post('/pdf/summarize', [ResumeController::class, 'summarizePdf']);
+    Route::resource('/registered/client', ClientListController::class);
+    Route::resource('/dashboard', DashboardController::class);
+    Route::resource('/jobs', JobsListController::class);
+
+    // // check pdf
+    // Route::get('/view-pdf', [ResumeController::class, 'viewIndexPdf']);
+    // Route::post('/pdf/summarize', [ResumeController::class, 'summarizePdf']);
 });

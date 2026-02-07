@@ -19,27 +19,26 @@
                             data-bs-toggle="dropdown">
                             <div class="parent-icon"><i class='bx bx-home-alt'></i>
                             </div>
-                            <div class="menu-title d-flex align-items-center" href="{{ url('index') }}">Dashboard</div>
+                            <div class="menu-title d-flex align-items-center"
+                                onclick="window.location='{{ url('dashboard') }}'">
+                                Dashboard
+                            </div>
+
                             <div class="ms-auto dropy-icon"><i class='bx bx-chevron-down'></i></div>
                         </a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"
                             data-bs-toggle="dropdown">
-                            <div class="parent-icon"><i class='bx bx-cube'></i>
+                            <div class="parent-icon"><i class='bx bx-user'></i>
                             </div>
-                            <div class="menu-title d-flex align-items-center">Contacts</div>
+                            <div class="menu-title d-flex align-items-center">Client</div>
                             <div class="ms-auto dropy-icon"><i class='bx bx-chevron-down'></i></div>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url('app-chat-box') }}"><i
-                                        class='bx bx-conversation'></i>Chat Box</a></li>
-                            <li><a class="dropdown-item" href="{{ url('app-file-manager') }}"><i
-                                        class='bx bx-file'></i>File Manager</a></li>
-                            <li><a class="dropdown-item" href="{{ url('app-contact-list') }}"><i
-                                        class='bx bx-microphone'></i>Contacts List</a></li>
-                            <li><a class="dropdown-item" href="{{ url('app-to-do') }}"><i
-                                        class='bx bx-check-shield'></i>Todo</a></li>
+                            <li><a class="dropdown-item" href="{{ url('registered/client') }}"><i
+                                        class='bx bx-user-voice'></i>
+                                    Client List</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
@@ -51,16 +50,12 @@
                             <div class="ms-auto dropy-icon"><i class='bx bx-chevron-down'></i></div>
                         </a>
                         <ul class="dropdown-menu">
-
-                            <li> <a class="dropdown-item" href="{{ url('form-layouts') }}"><i
+                            <li> <a class="dropdown-item" href="{{ url('jobs') }}"><i
                                         class='bx bx-layer'></i>Jobs List</a>
-                            </li>
-                            <li> <a class="dropdown-item" href="{{ url('form-text-editor') }}"><i
-                                        class='bx bx-edit'></i>Text Editor</a>
                             </li>
                         </ul>
                     </li>
-                    <li class="nav-item dropdown">
+                    <li class="nav-item dropdown" hidden>
                         <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"
                             data-bs-toggle="dropdown">
                             <div class="parent-icon"><i class='bx bx-lock'></i>
@@ -68,52 +63,6 @@
                             <div class="menu-title d-flex align-items-center">Authentication</div>
                             <div class="ms-auto dropy-icon"><i class='bx bx-chevron-down'></i></div>
                         </a>
-                        <ul class="dropdown-menu">
-                            <li class="nav-item dropend">
-                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret"
-                                    href="javascript:;"><i class='bx bx-receipt'></i>Basic</a>
-                                <ul class="dropdown-menu submenu">
-                                    <li><a class="dropdown-item" href="{{ url('auth-basic-signin') }}"><i
-                                                class='bx bx-radio-circle'></i>Sign In</a></li>
-                                    <li><a class="dropdown-item" href="{{ url('auth-basic-signup') }}"><i
-                                                class='bx bx-radio-circle'></i>Sign Up</a></li>
-                                    <li><a class="dropdown-item" href="{{ url('auth-basic-forgot-password') }}"><i
-                                                class='bx bx-radio-circle'></i>Forgot Password</a></li>
-                                    <li><a class="dropdown-item" href="{{ url('auth-basic-reset-password') }}"><i
-                                                class='bx bx-radio-circle'></i>Reset Password</a></li>
-                                </ul>
-                            </li>
-                            <li class="nav-item dropend">
-                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret"
-                                    href="javascript:;"><i class='bx bx-cylinder'></i>Cover</a>
-                                <ul class="dropdown-menu submenu">
-                                    <li><a class="dropdown-item" href="{{ url('auth-cover-signin') }}"><i
-                                                class='bx bx-radio-circle'></i>Sign In</a></li>
-                                    <li><a class="dropdown-item" href="{{ url('auth-cover-signup') }}"><i
-                                                class='bx bx-radio-circle'></i>Sign Up</a></li>
-                                    <li><a class="dropdown-item" href="{{ url('auth-cover-forgot-password') }}"><i
-                                                class='bx bx-radio-circle'></i>Forgot Password</a></li>
-                                    <li><a class="dropdown-item" href="{{ url('auth-cover-reset-password') }}"><i
-                                                class='bx bx-radio-circle'></i>Reset Password</a></li>
-                                </ul>
-                            </li>
-                            <li class="nav-item dropend">
-                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret"
-                                    href="javascript:;"><i class='bx bx-aperture'></i>Header & Footer</a>
-                                <ul class="dropdown-menu submenu">
-                                    <li><a class="dropdown-item" href="{{ url('auth-header-footer-signin') }}"><i
-                                                class='bx bx-radio-circle'></i>Sign In</a></li>
-                                    <li><a class="dropdown-item" href="{{ url('auth-header-footer-signup') }}"><i
-                                                class='bx bx-radio-circle'></i>Sign Up</a></li>
-                                    <li><a class="dropdown-item"
-                                            href="{{ url('auth-header-footer-forgot-password') }}"><i
-                                                class='bx bx-radio-circle'></i>Forgot Password</a></li>
-                                    <li><a class="dropdown-item"
-                                            href="{{ url('auth-header-footer-reset-password') }}"><i
-                                                class='bx bx-radio-circle'></i>Reset Password</a></li>
-                                </ul>
-                            </li>
-                        </ul>
                     </li>
                     <li class="nav-item dropdown" hidden>
                         <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"
@@ -127,28 +76,27 @@
                             <li> <a class="dropdown-item" href="{{ url('widgets') }}"><i
                                         class='bx bx-wine'></i>Widgets</a></li>
                             <li class="nav-item dropend">
-                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret"
-                                    href="javascript:;"><i class='bx bx-cart'></i>eCommerce</a>
+                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"><i
+                                        class='bx bx-cart'></i>eCommerce</a>
                                 <ul class="dropdown-menu submenu">
-
                                 </ul>
                             </li>
                             <li class="nav-item dropend">
-                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret"
-                                    href="javascript:;"><i class='bx bx-ghost'></i>Components</a>
+                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"><i
+                                        class='bx bx-ghost'></i>Components</a>
                                 <ul class="dropdown-menu scroll-menu">
 
                                 </ul>
                             </li>
                             <li class="nav-item dropend">
-                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret"
-                                    href="javascript:;"><i class='bx bx-card'></i>Content</a>
+                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"><i
+                                        class='bx bx-card'></i>Content</a>
                                 <ul class="dropdown-menu submenu">
                                 </ul>
                             </li>
                             <li class="nav-item dropend">
-                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret"
-                                    href="javascript:;"><i class='bx bx-droplet'></i>Icons</a>
+                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"><i
+                                        class='bx bx-droplet'></i>Icons</a>
                                 <ul class="dropdown-menu submenu">
                                 </ul>
                             </li>
@@ -163,7 +111,6 @@
                             <div class="ms-auto dropy-icon"><i class='bx bx-chevron-down'></i></div>
                         </a>
                         <ul class="dropdown-menu">
-
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
@@ -176,7 +123,8 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ url('table-basic-table') }}"><i
-                                        class='bx bx-table'></i>User Managemnet</a></li>
+                                        class='bx bx-user-check'></i>
+                                    </i>User Managemnet</a></li>
                         </ul>
                     </li>
                 </ul>

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Resume;
 use App\Models\ParsedData;
@@ -14,13 +15,13 @@ use Smalot\PdfParser\Parser;
 
 class ResumeController extends Controller
 {
-
     public function index()
     {
         //
     }
 
-    public function upload(Request $request, $user_id)
+
+     public function upload(Request $request, $user_id)
     {
         $request->validate([
             'pdf' => 'required|mimes:pdf,doc,docx|max:5120',
@@ -185,6 +186,10 @@ class ResumeController extends Controller
         }
     }
 
+
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
         //

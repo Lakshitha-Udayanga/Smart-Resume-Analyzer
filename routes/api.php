@@ -2,9 +2,9 @@
 
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\ResumeController;
+use App\Http\Controllers\API\LoginController;
+use App\Http\Controllers\API\RegisterController;
+use App\Http\Controllers\API\ResumeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Monolog\Registry;
