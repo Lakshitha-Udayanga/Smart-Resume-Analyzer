@@ -113,7 +113,7 @@
                         <ul class="dropdown-menu">
                         </ul>
                     </li>
-                    <li class="nav-item dropdown">
+                    <li class="nav-item dropdown" hidden>
                         <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"
                             data-bs-toggle="dropdown">
                             <div class="parent-icon"><i class="bx bx-grid-alt"></i>

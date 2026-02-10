@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ClientListController extends Controller
@@ -9,12 +10,16 @@ class ClientListController extends Controller
 
     public function index()
     {
-        return view('registered_client.index');
+        $users = User::query();
+        $perPage = request()->input('per_page', 10);
+
+        $users = $users->where('is_system_user', 0)->orderBy('created_at', 'desc')
+            ->paginate($perPage)
+            ->appends(request()->all());
+
+        return view('registered_client.index', compact('users', 'perPage'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         //

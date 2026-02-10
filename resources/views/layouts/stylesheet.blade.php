@@ -23,3 +23,5 @@
  <link rel="stylesheet" href="{{ asset('assets/css/header-colors.css') }}" />
 
  <link href="{{ asset('assets/plugins/vectormap/jquery-jvectormap-2.0.2.css') }}" rel="stylesheet" />
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
