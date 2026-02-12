@@ -114,11 +114,17 @@ class RegisterController extends Controller
 
             $user->save();
 
+            // return response()->json([
+            //     'success' => true,
+            //     'message' => 'Profile updated successfully',
+            //     'user' => $user
+            // ]);
+
             return response()->json([
-                'success' => true,
-                'message' => 'Profile updated successfully',
-                'user' => $user
-            ]);
+                'status' => 'success',
+                'user'   => $user,
+                'token'  => $user->api_token
+            ], 200);
         } catch (ValidationException $e) {
             return response()->json([
                 'status' => 'failed',
