@@ -125,12 +125,12 @@ class RegisterController extends Controller
             ], 200);
         } catch (ValidationException $e) {
             return response()->json([
-                'status' => 'failed',
+                'status' => 'failed '. $e->getMessage(),
                 'errors' => $e->errors()
             ], 422);
         } catch (\Throwable $th) {
             return response()->json([
-                'status' => 'failed',
+                'status' => 'failed ' .$th->getMessage(),
                 'msg'    => $th->getMessage()
             ], 500);
         }
