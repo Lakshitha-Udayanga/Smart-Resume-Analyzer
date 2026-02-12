@@ -29,7 +29,7 @@ class ResumeController extends Controller
 
         $path = $request->file('pdf')->store('pdf', 'public');
 
-        $url = asset('storage/' . $path);
+        $url = '/storage/' . $path;
 
         $resume = Resume::create([
             'user_id' => $user_id,
