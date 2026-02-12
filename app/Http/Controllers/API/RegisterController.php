@@ -31,7 +31,7 @@ class RegisterController extends Controller
      */
     public function store(Request $request)
     {
-         try {
+        try {
             $validated = $request->validate([
                 'first_name' => 'required|string|max:100',
                 'last_name'  => 'required|string|max:100',
@@ -94,7 +94,42 @@ class RegisterController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $id,
+                'phone' => 'required|string|max:20',
+                'password' => 'nullable|string|min:6|confirmed', // Password is optional
+            ]);
+
+            $user = User::findOrFail($id);
+
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->phone = $request->phone;
+
+            if ($request->filled('password')) {
+                $user->password = Hash::make($request->password);
+            }
+
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully',
+                'user' => $user
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => 'failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'failed',
+                'msg'    => $th->getMessage()
+            ], 500);
+        }
     }
 
     /**
