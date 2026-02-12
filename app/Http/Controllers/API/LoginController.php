@@ -19,7 +19,7 @@ class LoginController extends Controller
                 'password' => 'required',
             ]);
 
-            $user = User::where('email', $request->email)->first();
+            $user = User::where('email', $request->email)->with('cv_lists')->first();
 
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return response()->json(['message' => 'Invalid credentials'], 401);

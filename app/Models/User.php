@@ -48,4 +48,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+
+    public function cv_lists()
+    {
+        return $this->hasMany(Resume::class, 'user_id', 'id');
+    }
 }
