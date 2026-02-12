@@ -104,6 +104,8 @@ class RegisterController extends Controller
 
             $user = User::findOrFail($id);
 
+            DB::beginTransaction();
+
             $user->name = $request->name;
             $user->email = $request->email;
             $user->phone = $request->phone;
@@ -114,14 +116,10 @@ class RegisterController extends Controller
 
             $user->save();
 
-            // return response()->json([
-            //     'success' => true,
-            //     'message' => 'Profile updated successfully',
-            //     'user' => $user
-            // ]);
+            DB::commit();
 
             return response()->json([
-                'status' => 'success',
+                'status' => 'Profile updated successfully',
                 'user'   => $user,
                 'token'  => $user->api_token
             ], 200);
