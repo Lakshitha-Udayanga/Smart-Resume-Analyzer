@@ -20,8 +20,7 @@ class ResumeController extends Controller
         //
     }
 
-
-     public function upload(Request $request, $user_id)
+    public function upload(Request $request, $user_id)
     {
         $request->validate([
             'pdf' => 'required|mimes:pdf,doc,docx|max:5120',

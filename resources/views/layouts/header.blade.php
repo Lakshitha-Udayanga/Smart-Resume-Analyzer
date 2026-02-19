@@ -22,7 +22,7 @@
                             </li>
                             <li class="nav-item dropdown dropdown-laungauge d-none d-sm-flex">
                                 <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="avascript:;"
-                                    data-bs-toggle="dropdown"><img src="assets/images/county/02.png" width="22"
+                                    data-bs-toggle="dropdown"><img src="" width="22"
                                         alt="">
                                 </a>
                             </li>
@@ -56,7 +56,7 @@
                                         <a class="dropdown-item" href="javascript:;">
                                             <div class="d-flex align-items-center">
                                                 <div class="user-online">
-                                                    <img src="assets/images/avatars/avatar-1.png" class="msg-avatar"
+                                                    <img src="{{ asset('assets/images/avatar.png') }}" class="msg-avatar"
                                                         alt="user avatar">
                                                 </div>
                                                 <div class="flex-grow-1">
