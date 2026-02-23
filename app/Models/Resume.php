@@ -11,6 +11,6 @@ class Resume extends Model
 
     public function parsedData()
     {
-        return $this->hasOne(ParsedData::class);
+         return $this->hasOne(ParsedData::class, 'resume_id');
     }
 }

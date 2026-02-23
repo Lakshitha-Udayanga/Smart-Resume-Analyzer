@@ -19,7 +19,7 @@
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 
-        <form action="{{ url('/pdf/summarize') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ url('/get/jobs') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="mb-3">
                 <label for="pdf" class="form-label">Select PDF</label>

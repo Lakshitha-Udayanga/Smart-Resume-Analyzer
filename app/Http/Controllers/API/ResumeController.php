@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Resume;
 use App\Utils\ResumeTransactionUtil;
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -63,7 +64,6 @@ class ResumeController extends Controller
                 'error' => 'CV analyzed failed',
                 'message' => $e->getMessage()
             ], 500);
-
         }
     }
 
@@ -82,7 +82,7 @@ class ResumeController extends Controller
             $url = '/storage/' . $path;
 
             $resume = Resume::create([
-                'user_id' => Auth::user()->id,
+                'user_id' => 4,
                 'file_path' => $url,
             ]);
 
@@ -94,6 +94,41 @@ class ResumeController extends Controller
         } catch (\Illuminate\Http\Client\RequestException $e) {
             return response()->json([
                 'error' => 'AI MODULE failed',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getRecommentationJobs()
+    {
+        $client = new Client();
+        $resume = Resume::where('user_id', 4)->latest()->first();
+
+        if (!$resume) {
+            return response()->json(['error' => 'Resume not found'], 404);
+        }
+
+        $parsed = $resume->parsedData;
+
+        $data = [
+            'technical_skills' => $parsed->technicalSkills->pluck('description')->toArray() ?? [],
+            'soft_skills'      => $parsed->softSkills->pluck('description')->toArray() ?? [],
+            'certificates'     => $parsed->certificates->pluck('description')->toArray() ?? [],
+            'strengths'        => $parsed->strengths->pluck('description')->toArray() ?? [],
+            'summary'          => $parsed->summary_text ?? '',
+        ];
+        try {
+            $response = $client->post('http://54.205.147.241:5000/recommend-jobs', [
+                'json' => $data
+            ]);
+
+            $result = json_decode($response->getBody(), true);
+            dd($result);
+
+            return response()->json($result);
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            return response()->json([
+                'error' => 'Failed to fetch job recommendations',
                 'message' => $e->getMessage()
             ], 500);
         }

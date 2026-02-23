@@ -80,7 +80,7 @@ class ResumeTransactionUtil
             Weakness::insert($weaknesses);
         }
 
-        if (!empty($aiResult['skills'])) {
+        if (!empty($aiResult['technical_skills'])) {
             $skills = array_map(fn($skill) => [
                 'parsed_data_id' => $parsedData->id,
                 'description' => $skill,
