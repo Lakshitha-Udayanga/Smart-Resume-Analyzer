@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\ResumeController;
+use App\Http\Controllers\API\ResumeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ClientListController;
@@ -33,8 +33,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('/registered/client', ClientListController::class);
     Route::resource('/dashboard', DashboardController::class);
     Route::resource('/jobs', JobsListController::class);
-
-    // // check pdf
-    // Route::get('/view-pdf', [ResumeController::class, 'viewIndexPdf']);
-    // Route::post('/pdf/summarize', [ResumeController::class, 'summarizePdf']);
 });
+
+// check pdf
+Route::get('/view-pdf', [ResumeController::class, 'viewIndexPdf']);
+Route::post('/pdf/summarize', [ResumeController::class, 'summarizePdf']);
