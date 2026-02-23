@@ -5,16 +5,12 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Resume;
-use App\Models\JobRecommendation;
 use App\Utils\ResumeTransactionUtil;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Http;
-use Smalot\PdfParser\Parser;
 
 class ResumeController extends Controller
 {
-
     protected $resumeTransactionUtil;
 
     protected $moduleUtil;
@@ -67,6 +63,7 @@ class ResumeController extends Controller
                 'error' => 'CV analyzed failed',
                 'message' => $e->getMessage()
             ], 500);
+
         }
     }
 

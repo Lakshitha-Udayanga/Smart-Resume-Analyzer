@@ -29,7 +29,8 @@ class ResumeTransactionUtil
             $result = $response->json();
 
             $relevantLabels = [
-                'skills' => $result['skills'] ?? [],
+                'technical_skills' => $result['technical_skills'] ?? [],
+                'soft_skills' => $result['soft_skills'] ?? [],
                 'strengths' => $result['strengths'] ?? [],
                 'weaknesses' => $result['weaknesses'] ?? [],
                 'summary' => $result['summary'] ?? '',
@@ -40,7 +41,8 @@ class ResumeTransactionUtil
         }
 
         return [
-            'skills' => [],
+            'technical_skills' => [],
+            'soft_skills' => [],
             'strengths' => [],
             'weaknesses' => [],
             'summary' => '',
@@ -84,7 +86,7 @@ class ResumeTransactionUtil
                 'description' => $skill,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ], $aiResult['skills']);
+            ], $aiResult['technical_skills']);
 
             Skill::insert($skills);
         }
