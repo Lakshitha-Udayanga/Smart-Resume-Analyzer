@@ -118,6 +118,7 @@ class ResumeController extends Controller
             'summary'          => $parsed->summary_text ?? '',
         ];
         try {
+
             $response = $client->post('http://54.205.147.241:5000/recommend-jobs', [
                 'json' => $data
             ]);
