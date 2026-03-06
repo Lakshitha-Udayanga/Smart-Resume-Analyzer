@@ -23,7 +23,7 @@ class ResumeTransactionUtil
                 file_get_contents($file),
                 $file->getClientOriginalName()
             )
-            ->post('http://54.205.147.241:5000/analyze');
+            ->post('http://204.236.202.130:5000/analyze');
 
         if ($response->successful()) {
             $result = $response->json();
@@ -52,54 +52,87 @@ class ResumeTransactionUtil
 
     public function storeSummarizeData($aiResult, $resume)
     {
+        // // Save parsed summary
+        // $parsedData = ParsedData::create([
+        //     'resume_id' => $resume->id,
+        //     'summary_text' => $aiResult['summary'] ?? '',
+        // ]);
+
+        // if (!empty($aiResult['strengths'])) {
+        //     $strengths = array_map(fn($desc) => [
+        //         'parsed_data_id' => $parsedData->id,
+        //         'description' => $desc,
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ], $aiResult['strengths']);
+
+        //     Strength::insert($strengths);
+        // }
+
+        // if (!empty($aiResult['weaknesses'])) {
+        //     $weaknesses = array_map(fn($desc) => [
+        //         'parsed_data_id' => $parsedData->id,
+        //         'description' => $desc,
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ], $aiResult['weaknesses']);
+
+        //     Weakness::insert($weaknesses);
+        // }
+
+        // if (!empty($aiResult['technical_skills'])) {
+        //     $skills = array_map(fn($skill) => [
+        //         'parsed_data_id' => $parsedData->id,
+        //         'description' => $skill,
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ], $aiResult['technical_skills']);
+
+        //     Skill::insert($skills);
+        // }
+
+        // if (!empty($aiResult['certificates'])) {
+        //     $certificates = array_map(fn($cert) => [
+        //         'parsed_data_id' => $parsedData->id,
+        //         'description' => $cert,
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ], $aiResult['certificates']);
+
+        //     Certificate::insert($certificates);
+        // }
+
+        // return $parsedData;
+
+
         // Save parsed summary
         $parsedData = ParsedData::create([
             'resume_id' => $resume->id,
             'summary_text' => $aiResult['summary'] ?? '',
         ]);
 
-        if (!empty($aiResult['strengths'])) {
-            $strengths = array_map(fn($desc) => [
-                'parsed_data_id' => $parsedData->id,
-                'description' => $desc,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ], $aiResult['strengths']);
+        $dataMap = [
+            'strengths' => Strength::class,
+            'weaknesses' => Weakness::class,
+            'technical_skills' => Skill::class,
+            'certificates' => Certificate::class,
+        ];
 
-            Strength::insert($strengths);
-        }
+        foreach ($dataMap as $key => $model) {
 
-        if (!empty($aiResult['weaknesses'])) {
-            $weaknesses = array_map(fn($desc) => [
-                'parsed_data_id' => $parsedData->id,
-                'description' => $desc,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ], $aiResult['weaknesses']);
+            if (!empty($aiResult[$key])) {
 
-            Weakness::insert($weaknesses);
-        }
+                $records = array_map(function ($value) use ($parsedData) {
+                    return [
+                        'parsed_data_id' => $parsedData->id,
+                        'description' => $value,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }, $aiResult[$key]);
 
-        if (!empty($aiResult['technical_skills'])) {
-            $skills = array_map(fn($skill) => [
-                'parsed_data_id' => $parsedData->id,
-                'description' => $skill,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ], $aiResult['technical_skills']);
-
-            Skill::insert($skills);
-        }
-
-        if (!empty($aiResult['certificates'])) {
-            $certificates = array_map(fn($cert) => [
-                'parsed_data_id' => $parsedData->id,
-                'description' => $cert,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ], $aiResult['certificates']);
-
-            Certificate::insert($certificates);
+                $model::insert($records);
+            }
         }
 
         return $parsedData;
