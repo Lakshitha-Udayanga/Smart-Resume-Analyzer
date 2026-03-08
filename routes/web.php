@@ -29,7 +29,6 @@ Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
-
     Route::resource('/registered/client', ClientListController::class);
     Route::resource('/dashboard', DashboardController::class);
     Route::resource('/jobs', JobsListController::class);

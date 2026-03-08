@@ -46,14 +46,6 @@ class ResumeController extends Controller
             // Save parsed data to DB
             $data = $this->resumeTransactionUtil->storeSummarizeData($aiResult, $resume);
 
-            // foreach ($aiResult['job_recommendations'] ?? [] as $job) {
-            //     JobRecommendation::create([
-            //         'parsed_data_id' => $data->id,
-            //         'job_title' => $job['job_title'],
-            //         'job_description' => $job['job_description'],
-            //     ]);
-            // }
-
             return response()->json([
                 'status' => 'success',
                 'message' => 'Resume uploaded and analyzed successfully',

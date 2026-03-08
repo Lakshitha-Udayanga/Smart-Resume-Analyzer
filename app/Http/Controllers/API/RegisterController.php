@@ -99,7 +99,7 @@ class RegisterController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email,' . $id,
                 'phone' => 'required|string|max:20',
-                'password' => 'nullable|string|min:6|confirmed', // Password is optional
+                'password' => 'nullable|string|min:6|confirmed',
             ]);
 
             $user = User::findOrFail($id);
