@@ -6,9 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Resume;
 use App\Utils\ResumeTransactionUtil;
+use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 class ResumeController extends Controller
 {
@@ -16,9 +17,17 @@ class ResumeController extends Controller
 
     protected $moduleUtil;
 
+    protected $geminiKey;
+
+    protected $endpoint;
+
     public function __construct(ResumeTransactionUtil $resumeTransactionUtil)
     {
         $this->resumeTransactionUtil = $resumeTransactionUtil;
+
+        $this->geminiKey = env('GEMINI_API_KEY');
+
+        $this->endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$this->geminiKey}";
     }
 
     public function upload(Request $request, $user_id)
@@ -40,11 +49,19 @@ class ResumeController extends Controller
 
             $file = $request->file('pdf');
 
-            // Call AI parsing service (Python API)
-            $aiResult = $this->resumeTransactionUtil->callAISummarizePdf($file);
+            // $aiResult = $this->resumeTransactionUtil->callAISummarizePdf($file);
 
-            // Save parsed data to DB
-            $data = $this->resumeTransactionUtil->storeSummarizeData($aiResult, $resume);
+            // $data = $this->resumeTransactionUtil->storeSummarizeData($aiResult, $resume);
+
+            $text = $this->resumeTransactionUtil->extractTedx($request);
+
+            $aiResult = $this->askGemini($text);
+
+            $cleanJson = str_replace(['```json', '```'], '', $aiResult);
+
+            $aiResult = json_decode(trim($cleanJson), true);
+
+            $data = $this->resumeTransactionUtil->newStoreDataSummarizeData($aiResult, $resume);
 
             return response()->json([
                 'status' => 'success',
@@ -67,8 +84,6 @@ class ResumeController extends Controller
     public function summarizePdf(Request $request)
     {
         try {
-            $file = $request->file('pdf');
-
             $path = $request->file('pdf')->store('pdf', 'public');
 
             $url = '/storage/' . $path;
@@ -78,9 +93,15 @@ class ResumeController extends Controller
                 'file_path' => $url,
             ]);
 
-            $aiResult = $this->resumeTransactionUtil->callAISummarizePdf($file);
+            $text = $this->resumeTransactionUtil->extractTedx($request);
 
-            $data = $this->resumeTransactionUtil->storeSummarizeData($aiResult, $resume);
+            $aiResult = $this->askGemini($text);
+
+            $cleanJson = str_replace(['```json', '```'], '', $aiResult);
+
+            $aiResult = json_decode(trim($cleanJson), true);
+
+            $data = $this->resumeTransactionUtil->newStoreDataSummarizeData($aiResult, $resume);
 
             return view('test_pdf.pdf_upload', compact('aiResult'));
         } catch (\Illuminate\Http\Client\RequestException $e) {
@@ -91,39 +112,83 @@ class ResumeController extends Controller
         }
     }
 
-    public function getRecommentationJobs()
+    public function askGemini($text)
     {
-        $client = new Client();
-        $resume = Resume::where('user_id', 4)->latest()->first();
+        $base64Text = base64_encode($text);
 
-        if (!$resume) {
-            return response()->json(['error' => 'Resume not found'], 404);
-        }
+        $prompt = "
+                You are a professional CV analyzer. Analyze the following CV text and return a VALID JSON object with fields:
+                - experiences (array of strings)
+                - soft_skills (array of strings)
+                - technical_skills (array of strings)
+                - weaknesses (array of strings)
+                - summary (short paragraph)
+                - strengths (array of strings)
+                - certifications (array of strings)
 
-        $parsed = $resume->parsedData;
+                CV Text:
+                \"\"\"{$base64Text}\"\"\"
+                ";
 
-        $data = [
-            'technical_skills' => $parsed->technicalSkills->pluck('description')->toArray() ?? [],
-            'soft_skills'      => $parsed->softSkills->pluck('description')->toArray() ?? [],
-            'certificates'     => $parsed->certificates->pluck('description')->toArray() ?? [],
-            'strengths'        => $parsed->strengths->pluck('description')->toArray() ?? [],
-            'summary'          => $parsed->summary_text ?? '',
-        ];
-        try {
-
-            $response = $client->post('http://204.236.202.130:5000/recommend-jobs', [
-                'json' => $data
+        $response = Http::timeout(120)
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post($this->endpoint, [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt]
+                        ]
+                    ]
+                ]
             ]);
 
-            $result = json_decode($response->getBody(), true);
-            dd($result);
+        if ($response->failed()) {
+            return "Error: " . $response->body();
+        }
 
-            return response()->json($result);
-        } catch (\GuzzleHttp\Exception\RequestException $e) {
-            return response()->json([
-                'error' => 'Failed to fetch job recommendations',
-                'message' => $e->getMessage()
-            ], 500);
+        $data = $response->json();
+
+        return $data['candidates'][0]['content']['parts'][0]['text'] ?? 'No response generated.';
+    }
+
+
+    public function ollamRead($text)
+    {
+        $base64Text = base64_encode($text);
+
+        $model = 'llama3.2:1b';
+
+        $prompt = "
+                You are a professional CV analyzer. Analyze the following CV text and return a VALID JSON object with fields:
+                - experiences (array of strings)
+                - soft_skills (array of strings)
+                - technical_skills (array of strings)
+                - weaknesses (array of strings)
+                - summary (short paragraph)
+                - strengths (array of strings)
+                - certifications (array of strings)
+
+                CV Text:
+                \"\"\"{$base64Text}\"\"\"
+                ";
+
+        $response = Http::timeout(180)->post(
+            'http://44.220.55.233:11434/api/generate',
+            [
+                'model' => 'llama3.2:1b',
+                'prompt' => $prompt,
+                'stream' => false,
+                'format' => 'json'
+            ]
+        );
+
+        if ($response->successful()) {
+            $data = $response->json();
+            dd($data);
+            return $data;
+        } else {
+            return $response->body();
         }
     }
 

@@ -11,7 +11,6 @@
     <div class="container mt-5">
         <h2>Upload PDF to Summarize</h2>
 
-        <!-- Display success or error message -->
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
@@ -19,7 +18,7 @@
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 
-        <form action="{{ url('/get/jobs') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ url('/pdf/summarize') }}" method="post" enctype="multipart/form-data">
             @csrf
             <div class="mb-3">
                 <label for="pdf" class="form-label">Select PDF</label>
@@ -29,16 +28,8 @@
             <button type="submit" class="btn btn-primary">Upload & Summarize</button>
         </form>
 
-        {{-- @if (isset($summary))
-        <div class="mt-4">
-            <h4>Summary:</h4>
-            <div class="border p-3">{{ $summary }}</div>
-        </div>
-    @endif --}}
-
         @if (isset($aiResult))
             <div class="mt-5">
-                <!-- Summary Card -->
                 <div class="card shadow mb-4">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">Professional Summary</h5>
@@ -49,7 +40,6 @@
                 </div>
                 <div class="row">
 
-                    <!-- Strengths -->
                     <div class="col-md-6">
                         <div class="card shadow mb-4">
                             <div class="card-header bg-success text-white">
@@ -71,7 +61,6 @@
                         </div>
                     </div>
 
-                    <!-- Weaknesses -->
                     <div class="col-md-6">
                         <div class="card shadow mb-4">
                             <div class="card-header bg-danger text-white">
@@ -96,7 +85,6 @@
 
                 <div class="row">
 
-                    <!-- Skills -->
                     <div class="col-md-6">
                         <div class="card shadow mb-4">
                             <div class="card-header bg-info text-white">
@@ -116,7 +104,6 @@
                         </div>
                     </div>
 
-                    <!-- Certificates -->
                     <div class="col-md-6">
                         <div class="card shadow mb-4">
                             <div class="card-header bg-warning text-dark">
@@ -137,10 +124,52 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="col-md-6">
+                        <div class="card shadow mb-4">
+                            <div class="card-header bg-warning text-dark">
+                                Experiences
+                            </div>
+                            <div class="card-body">
+                                @if (!empty($aiResult['experiences']))
+                                    <ul class="list-group list-group-flush">
+                                        @foreach ($aiResult['experiences'] as $cert)
+                                            <li class="list-group-item">
+                                                📜 {{ $cert }}
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <p class="text-muted">No experiences detected.</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card shadow mb-4">
+                            <div class="card-header bg-warning text-dark">
+                                Soft skills
+                            </div>
+                            <div class="card-body">
+                                @if (!empty($aiResult['soft_skills']))
+                                    <ul class="list-group list-group-flush">
+                                        @foreach ($aiResult['soft_skills'] as $cert)
+                                            <li class="list-group-item">
+                                                📜 {{ $cert }}
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <p class="text-muted">No soft_skills detected.</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         @endif
-
 
     </div>
 </body>
