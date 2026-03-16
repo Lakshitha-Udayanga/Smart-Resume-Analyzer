@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\Job;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -9,7 +11,12 @@ class DashboardController extends Controller
 
     public function index()
     {
-        return view('home.index');
+        $totalClients = User::where('is_system_user', 0)->count();
+        $activeClients = User::where('is_system_user', 0)->has('cv_lists')->count();
+        $activeJobs = Job::where('status', 'active')->count();
+        $inactiveJobs = Job::where('status', 'inactive')->count();
+
+        return view('home.index', compact('totalClients', 'activeClients', 'activeJobs', 'inactiveJobs'));
     }
 
     /**

@@ -10,7 +10,7 @@
                             <div class="d-flex align-items-center">
                                 <div>
                                     <p class="mb-0 text-secondary">Total Clients</p>
-                                    <h4 class="my-1 text-info">4805</h4>
+                                    <h4 class="my-1 text-info">{{ number_format($totalClients) }}</h4>
                                 </div>
                                 <div class="widgets-icons-2 rounded-circle bg-gradient-blues text-white ms-auto"><i
                                         class='bx bxs-cart'></i>
@@ -25,7 +25,7 @@
                             <div class="d-flex align-items-center">
                                 <div>
                                     <p class="mb-0 text-secondary">Total Active Clients</p>
-                                    <h4 class="my-1 text-danger">84,245</h4>
+                                    <h4 class="my-1 text-danger">{{ number_format($activeClients) }}</h4>
                                 </div>
                                 <div class="widgets-icons-2 rounded-circle bg-gradient-burning text-white ms-auto"><i
                                         class='bx bxs-wallet'></i>
@@ -40,7 +40,7 @@
                             <div class="d-flex align-items-center">
                                 <div>
                                     <p class="mb-0 text-secondary">Total Active Jobs</p>
-                                    <h4 class="my-1 text-success">34</h4>
+                                    <h4 class="my-1 text-success">{{ number_format($activeJobs) }}</h4>
                                 </div>
                                 <div class="widgets-icons-2 rounded-circle bg-gradient-ohhappiness text-white ms-auto"><i
                                         class='bx bxs-bar-chart-alt-2'></i>
@@ -55,7 +55,7 @@
                             <div class="d-flex align-items-center">
                                 <div>
                                     <p class="mb-0 text-secondary">Total Inactive Jobs</p>
-                                    <h4 class="my-1 text-warning">8</h4>
+                                    <h4 class="my-1 text-warning">{{ number_format($inactiveJobs) }}</h4>
                                 </div>
                                 <div class="widgets-icons-2 rounded-circle bg-gradient-orange text-white ms-auto"><i
                                         class='bx bxs-group'></i>

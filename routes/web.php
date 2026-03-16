@@ -32,6 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('/registered/client', ClientListController::class);
     Route::resource('/dashboard', DashboardController::class);
     Route::resource('/jobs', JobsListController::class);
+    Route::post('/jobs/import', [JobsListController::class, 'import'])->name('jobs.import');
 });
 
 // check pdf

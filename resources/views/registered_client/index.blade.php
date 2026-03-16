@@ -45,6 +45,7 @@
                                 <th>Email</th>
                                 <th>Phone No</th>
                                 <th>Ref No</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -54,6 +55,11 @@
                                     <td>{{ $user->email }}</td>
                                     <td>{{ $user->phone }}</td>
                                     <td>{{ $user->user_ref_no }}</td>
+                                    <td>
+                                        <a href="{{ route('client.show', $user->id) }}" class="btn btn-sm btn-primary">
+                                            <i class="bx bx-show me-1"></i> View Profile
+                                        </a>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>

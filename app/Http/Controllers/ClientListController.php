@@ -38,7 +38,16 @@ class ClientListController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $user = User::with([
+            'cv_lists.parsedData.strengths',
+            'cv_lists.parsedData.weaknesses',
+            'cv_lists.parsedData.technicalSkills',
+            'cv_lists.parsedData.softSkills',
+            'cv_lists.parsedData.certificates',
+            'cv_lists.parsedData.jobRecommendations'
+        ])->findOrFail($id);
+
+        return view('registered_client.show', compact('user'));
     }
 
     /**

@@ -48,6 +48,10 @@
             <div class="card-header smart-card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0 text-primary fw-semibold"> <i class="bx bx-briefcase me-1"></i> View All Jobs</h6>
                 <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#importModal">
+                        <i class="bx bx-upload me-1"></i> Import Excel
+                    </button>
+                    &nbsp;&nbsp;
                     <a href="{{ route('jobs.create') }}" class="btn btn-sm btn-primary">
                         <i class="bx bx-plus me-1"></i> Add
                     </a>
@@ -144,6 +148,34 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('jobs.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="importModalLabel">Import Jobs from Excel</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Choose Excel File (.xlsx, .xls, .csv)</label>
+                            <input type="file" name="file" class="form-control" id="file" required>
+                        </div>
+                        <div class="text-muted small">
+                            Expected columns: job_position_name, company_name, department_category, job_location, salary_min, salary_max, experience_level, skills, post_date, closing_date
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Upload and Import</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

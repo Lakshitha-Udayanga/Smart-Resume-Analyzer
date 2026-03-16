@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
+use App\Imports\JobsImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class JobsListController extends Controller
 {
@@ -163,6 +165,27 @@ class JobsListController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Job Delete Error', [$e]);
+        }
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        try {
+            Excel::import(new JobsImport, $request->file('file'));
+
+            return redirect()->route('jobs.index')->with('success', 'Jobs imported successfully.');
+        } catch (\Throwable $e) {
+            Log::error('Job Import Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return redirect()->back()->with('error', 'Error importing Jobs: ' . $e->getMessage());
         }
     }
 }
