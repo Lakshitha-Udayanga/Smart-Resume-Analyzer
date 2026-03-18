@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Resume;
+use App\Models\User;
 use App\Utils\ResumeTransactionUtil;
 use Exception;
 use GuzzleHttp\Client;
@@ -152,7 +153,6 @@ class ResumeController extends Controller
         return $data['candidates'][0]['content']['parts'][0]['text'] ?? 'No response generated.';
     }
 
-
     public function ollamRead($text)
     {
         $base64Text = base64_encode($text);
@@ -192,46 +192,50 @@ class ResumeController extends Controller
         }
     }
 
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
     /**
      * Remove the specified resource from storage.
      */
+    public function getProfileData($user_id)
+    {
+        try {
+            $user = User::with(['cv_lists' => function ($query) {
+                $query->latest();
+            }, 'cv_lists.parsedData' => function ($query) {
+                $query->with(['strengths', 'weaknesses', 'technical_skills', 'soft_skills', 'certificates', 'experiences']);
+            }])->findOrFail($user_id);
+
+            $latestResume = $user->cv_lists->first();
+
+            if (!$latestResume || !$latestResume->parsedData) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No parsed resume found for this user'
+                ], 404);
+            }
+
+            $parsedData = $latestResume->parsedData;
+
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'strengths' => $parsedData->strengths->pluck('description'),
+                    'weaknesses' => $parsedData->weaknesses->pluck('description'),
+                    'skills' => $parsedData->technical_skills->pluck('description'),
+                    'soft_skills' => $parsedData->soft_skills->pluck('description'),
+                    'certificates' => $parsedData->certificates->pluck('description'),
+                    'experiences' => $parsedData->experiences->pluck('description'),
+                    'summary' => $parsedData->summary_text
+                ]
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to retrieve profile data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function destroy(string $id)
     {
         //

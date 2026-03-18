@@ -47,8 +47,7 @@ class LoginController extends Controller
         Auth::login($user);
 
         // $request->session()->regenerate();
-
-        return view('home.index');
+        return redirect('/dashboard');
     }
 
     /**

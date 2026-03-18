@@ -7,7 +7,6 @@
 @section('wrapper')
     <div class="container-fluid">
 
-        <!-- ================= FILTER CARD ================= -->
         <div class="card smart-card mb-4">
             <div class="card-header smart-card-header">
                 <h6 class="mb-0 text-primary fw-semibold">
@@ -43,7 +42,6 @@
             </div>
         </div>
 
-        <!-- ================= TABLE CARD ================= -->
         <div class="card smart-card">
             <div class="card-header smart-card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0 text-primary fw-semibold"> <i class="bx bx-briefcase me-1"></i> View All Jobs</h6>
@@ -60,7 +58,6 @@
 
             <div class="card-body">
 
-                <!-- SHOW ENTRIES -->
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <form method="GET" id="perPageForm">
                         @foreach (request()->except('per_page') as $key => $value)
@@ -91,7 +88,7 @@
                                 <th>Job Type</th>
                                 <th>Job Location</th>
                                 <th>Closing Date</th>
-                                <th>Description</th>
+                                <th>Skills</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -107,7 +104,7 @@
                                     <td>{{ $job->job_type }}</td>
                                     <td>{{ $job->location }}</td>
                                     <td>{{ $job->closing_date }}</td>
-                                    <td>{{ Str::limit($job->description, 50) }}</td>
+                                    <td>{{ Str::limit($job->skills, 50) }}</td>
                                     <td>
                                         @if ($job->status == 'active')
                                             <span class="badge bg-success">Active</span>

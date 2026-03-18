@@ -24,14 +24,14 @@ class ParsedData extends Model
         return $this->hasMany(Weakness::class, 'parsed_data_id');
     }
 
-    public function technicalSkills()
+    public function technical_skills()
     {
         return $this->hasMany(Skill::class, 'parsed_data_id');
     }
 
-    public function softSkills()
+    public function soft_skills()
     {
-        return $this->hasMany(Skill::class, 'parsed_data_id');
+        return $this->hasMany(SoftSkill::class, 'parsed_data_id');
     }
 
     public function certificates()
@@ -39,6 +39,10 @@ class ParsedData extends Model
         return $this->hasMany(Certificate::class, 'parsed_data_id');
     }
 
+    public function experiences()
+    {
+        return $this->hasMany(Experience::class, 'parsed_data_id');
+    }
 
     public function jobRecommendations()
     {
