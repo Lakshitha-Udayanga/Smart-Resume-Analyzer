@@ -46,7 +46,7 @@ class ParsedData extends Model
 
     public function job_recommendations()
     {
-        return $this->hasMany(Experience::class, 'parsed_data_id');
+        return $this->hasMany(JobRecommendation::class, 'parsed_data_id');
     }
 
 }

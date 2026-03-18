@@ -7,10 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class JobRecommendation extends Model
 {
-    protected $fillable = ['parsed_data_id', 'job_title', 'job_description'];
+    protected $fillable = ['parsed_data_id', 'job_id', 'job_title', 'company_name', 'job_description', 'match_score', 'matched_skills'];
 
     public function parsedData()
     {
         return $this->belongsTo(ParsedData::class);
+    }
+
+    public function job()
+    {
+        return $this->belongsTo(Job::class);
     }
 }

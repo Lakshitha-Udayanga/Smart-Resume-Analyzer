@@ -4,12 +4,15 @@ namespace App\Utils;
 
 use App\Models\Certificate;
 use App\Models\Experience;
+use App\Models\Job;
 use Illuminate\Support\Facades\Http;
 use App\Models\ParsedData;
 use App\Models\Strength;
 use App\Models\Weakness;
 use App\Models\Skill;
 use App\Models\SoftSkill;
+use App\Models\JobRecommendation;
+use App\Models\User;
 use PhpOffice\PhpWord\IOFactory;
 use Smalot\PdfParser\Parser as PdfParser;
 
@@ -123,5 +126,147 @@ class ResumeTransactionUtil
             ], 400);
         }
         return $text;
+    }
+
+    public function getRecommendationsJobs($user_id, $resume = null, $parsed_data = null)
+    {
+        if (!$parsed_data) {
+            $user = User::with([
+                'cv_lists' => function ($query) {
+                    $query->latest();
+                },
+                'cv_lists.parsedData' => function ($query) {
+                    $query->with([
+                        'strengths',
+                        'weaknesses',
+                        'technical_skills',
+                        'soft_skills',
+                        'certificates',
+                        'experiences'
+                    ]);
+                }
+            ])->findOrFail($user_id);
+
+            $latest_resume = $user->cv_lists->where('id', $resume->id)->first();
+
+            if (!$latest_resume || !$latest_resume->parsedData) {
+                return [];
+            }
+
+            $parsed_data = $latest_resume->parsedData;
+        }
+        $user_profile = implode(" ", [
+            $parsed_data->summary_text,
+            implode(" ", $parsed_data->strengths->pluck('description')->toArray()),
+            implode(" ", $parsed_data->weaknesses->pluck('description')->toArray()),
+            implode(" ", $parsed_data->technical_skills->pluck('description')->toArray()),
+            implode(" ", $parsed_data->soft_skills->pluck('description')->toArray()),
+            implode(" ", $parsed_data->certificates->pluck('description')->toArray()),
+            implode(" ", $parsed_data->experiences->pluck('description')->toArray()),
+        ]);
+
+        $jobs = Job::select('id', 'title', 'company_name', 'skills', 'experience_level','link')->get();
+
+        $response = Http::timeout(120)->post('http://50.17.87.226:5000/match-jobs', [
+            'user_profile' => $user_profile,
+            'jobs' => $jobs->toArray()
+        ]);
+
+        if ($response->failed()) {
+            return [];
+        }
+
+        if (is_array($response->json())) {
+            foreach ($response->json() as $rec) {
+                JobRecommendation::updateOrCreate(
+                    [
+                        'parsed_data_id' => $parsed_data->id,
+                        'job_id' => $rec['id'] ?? null,
+                    ],
+                    [
+                        'job_title' => $rec['title'] ?? '',
+                        'company_name' => $rec['company_name'] ?? '',
+                        'match_score' => $rec['final_score'] ?? 0,
+                        'matched_skills' => isset($rec['matched_skills']) ? json_encode($rec['matched_skills']) : null,
+                    ]
+                );
+            }
+        }
+
+        return $response->json();
+    }
+
+    public function getProfileData($user_id)
+    {
+        $user = User::with(['cv_lists' => function ($query) {
+            $query->latest();
+        }, 'cv_lists.parsedData' => function ($query) {
+            $query->with(['strengths', 'weaknesses', 'technical_skills', 'soft_skills', 'certificates', 'experiences', 'job_recommendations']);
+        }])->findOrFail($user_id);
+
+        $latestResume = $user->cv_lists->first();
+
+        if (!$latestResume || !$latestResume->parsedData) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No parsed resume found for this user'
+            ], 404);
+        }
+
+        $parsedData = $latestResume->parsedData;
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'strengths' => $parsedData->strengths->pluck('description'),
+                'weaknesses' => $parsedData->weaknesses->pluck('description'),
+                'skills' => $parsedData->technical_skills->pluck('description'),
+                'soft_skills' => $parsedData->soft_skills->pluck('description'),
+                'certificates' => $parsedData->certificates->pluck('description'),
+                'experiences' => $parsedData->experiences->pluck('description'),
+                'summary' => $parsedData->summary_text,
+                'job_recommendations' => $parsedData->experiences->pluck('description', 'job_title', 'match_score'),
+            ]
+        ]);
+    }
+
+    //ollam server request
+    public function ollamRead($text)
+    {
+        $base64Text = base64_encode($text);
+
+        $model = 'llama3.2:1b';
+
+        $prompt = "
+                You are a professional CV analyzer. Analyze the following CV text and return a VALID JSON object with fields:
+                - experiences (array of strings)
+                - soft_skills (array of strings)
+                - technical_skills (array of strings)
+                - weaknesses (array of strings)
+                - summary (short paragraph)
+                - strengths (array of strings)
+                - certifications (array of strings)
+
+                CV Text:
+                \"\"\"{$base64Text}\"\"\"
+                ";
+
+        $response = Http::timeout(180)->post(
+            'http://44.220.55.233:11434/api/generate',
+            [
+                'model' => 'llama3.2:1b',
+                'prompt' => $prompt,
+                'stream' => false,
+                'format' => 'json'
+            ]
+        );
+
+        if ($response->successful()) {
+            $data = $response->json();
+            dd($data);
+            return $data;
+        } else {
+            return $response->body();
+        }
     }
 }

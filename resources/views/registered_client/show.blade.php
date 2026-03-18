@@ -5,7 +5,6 @@
 
 @section('wrapper')
     <div class="container-fluid">
-        <!-- ================= PROFILE HEADER ================= -->
         <div class="card smart-card mb-4 overflow-hidden">
             <div class="card-body p-0">
                 <div class="bg-primary p-4 text-white d-flex align-items-center justify-content-between">
@@ -16,7 +15,7 @@
                         <div>
                             <h3 class="mb-1 text-white">{{ $user->name }}</h3>
                             <p class="mb-0 text-white-50">
-                                <i class="bx bx-envelope me-1"></i> {{ $user->email }} | 
+                                <i class="bx bx-envelope me-1"></i> {{ $user->email }} |
                                 <i class="bx bx-phone me-1"></i> {{ $user->phone ?? 'No Phone' }}
                             </p>
                         </div>
@@ -31,7 +30,6 @@
         </div>
 
         <div class="row">
-            <!-- Navigation Sidebar -->
             <div class="col-lg-3">
                 <div class="card smart-card mb-4">
                     <div class="card-header smart-card-header">
@@ -40,10 +38,10 @@
                     <div class="card-body p-0">
                         <div class="list-group list-group-flush" id="resume-tabs" role="tablist">
                             @forelse($user->cv_lists as $index => $resume)
-                                <a class="list-group-item list-group-item-action {{ $index == 0 ? 'active' : '' }}" 
-                                   id="resume-tab-{{ $resume->id }}" 
-                                   data-bs-toggle="list" 
-                                   href="#resume-{{ $resume->id }}" 
+                                <a class="list-group-item list-group-item-action {{ $index == 0 ? 'active' : '' }}"
+                                   id="resume-tab-{{ $resume->id }}"
+                                   data-bs-toggle="list"
+                                   href="#resume-{{ $resume->id }}"
                                    role="tab">
                                     <div class="d-flex w-100 justify-content-between align-items-center">
                                         <h6 class="mb-1 text-inherit">Resume #{{ $index + 1 }}</h6>
@@ -67,7 +65,6 @@
                     @forelse($user->cv_lists as $index => $resume)
                         <div class="tab-pane fade {{ $index == 0 ? 'show active' : '' }}" id="resume-{{ $resume->id }}" role="tabpanel">
                             @if($resume->parsedData)
-                                <!-- Summary -->
                                 <div class="card smart-card mb-4 border-start border-4 border-primary">
                                     <div class="card-body">
                                         <h5 class="card-title text-primary"><i class="bx bx-info-circle me-1"></i> Summary</h5>
@@ -76,7 +73,6 @@
                                 </div>
 
                                 <div class="row">
-                                    <!-- Strengths -->
                                     <div class="col-md-6 mb-4">
                                         <div class="card smart-card h-100">
                                             <div class="card-header bg-success text-white">
@@ -97,7 +93,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Weaknesses -->
                                     <div class="col-md-6 mb-4">
                                         <div class="card smart-card h-100">
                                             <div class="card-header bg-danger text-white">
@@ -120,7 +115,6 @@
                                 </div>
 
                                 <div class="row">
-                                    <!-- Skills -->
                                     <div class="col-md-6 mb-4">
                                         <div class="card smart-card h-100">
                                             <div class="card-header smart-card-header">
@@ -128,7 +122,7 @@
                                             </div>
                                             <div class="card-body">
                                                 <div class="d-flex flex-wrap gap-2">
-                                                    @forelse($resume->parsedData->technicalSkills as $skill)
+                                                    @forelse($resume->parsedData->technical_skills as $skill)
                                                         <span class="badge bg-light text-primary border border-primary px-3 py-2">
                                                             {{ $skill->description }}
                                                         </span>
@@ -140,7 +134,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Certificates -->
                                     <div class="col-md-6 mb-4">
                                         <div class="card smart-card h-100">
                                             <div class="card-header smart-card-header">
@@ -162,14 +155,13 @@
                                     </div>
                                 </div>
 
-                                <!-- Job Recommendations -->
                                 <div class="card smart-card mb-4">
                                     <div class="card-header smart-card-header bg-light">
                                         <h6 class="mb-0 text-primary fw-semibold"><i class="bx bx-briefcase-alt-2 me-1"></i> Compatible Job Roles</h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
-                                            @forelse($resume->parsedData->jobRecommendations as $job)
+                                            @forelse($resume->parsedData->job_recommendations as $job)
                                                 <div class="col-md-6 mb-3">
                                                     <div class="p-3 bg-light rounded border-start border-3 border-primary h-100">
                                                         <h6 class="mb-1 text-primary">{{ $job->job_title }}</h6>
@@ -226,7 +218,6 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            // Future enhancements if needed
         });
     </script>
 @endsection

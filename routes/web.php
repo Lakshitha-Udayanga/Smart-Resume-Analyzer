@@ -38,5 +38,4 @@ Route::middleware('auth')->group(function () {
 // check pdf
 Route::get('/view-pdf', [ResumeController::class, 'viewIndexPdf']);
 Route::post('/pdf/summarize', [ResumeController::class, 'summarizePdf']);
-
-Route::post('/get/jobs', [ResumeController::class, 'getRecommentationJobs']);
+Route::post('/get/jobs', [ResumeController::class, 'getRecommendations']);

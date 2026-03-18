@@ -28,6 +28,7 @@ class JobsImport implements ToModel, WithHeadingRow
             'skills'           => $row['skills'],
             'description'      => $row['description'] ?? null,
             'status'           => $row['status'] ?? 'active',
+            'link'             => $row['link'] ?? null,
             'post_date'        => isset($row['post_date']) ? Carbon::parse($row['post_date']) : null,
             'closing_date'     => isset($row['closing_date']) ? Carbon::parse($row['closing_date']) : null,
         ]);

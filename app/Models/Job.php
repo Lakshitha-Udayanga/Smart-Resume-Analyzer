@@ -21,6 +21,7 @@ class Job extends Model
         'skills',
         'description',
         'status',
+        'link',
         'post_date',
         'closing_date'
     ];

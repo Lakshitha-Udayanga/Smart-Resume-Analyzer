@@ -100,6 +100,12 @@
                             </select>
                         </div>
 
+                        <!-- Job Link -->
+                        <div class="col-md-6">
+                            <label class="form-label">Job Link</label>
+                            <input type="url" name="link" value="{{ old('link', $job->link) }}" class="form-control" placeholder="https://example.com/job">
+                        </div>
+
                         <!-- Skills -->
                         <div class="col-md-6">
                             <label class="form-label">Skills (comma separated)</label>

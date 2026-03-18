@@ -55,6 +55,12 @@
                             </li>
                         </ul>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url('view-pdf') }}">
+                            <div class="parent-icon"><i class='bx bx-test-tube'></i></div>
+                            <div class="menu-title d-flex align-items-center">Unit Testing</div>
+                        </a>
+                    </li>
                     <li class="nav-item dropdown" hidden>
                         <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"
                             data-bs-toggle="dropdown">

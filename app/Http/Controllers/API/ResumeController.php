@@ -5,11 +5,11 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Resume;
-use App\Models\User;
 use App\Utils\ResumeTransactionUtil;
 use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class ResumeController extends Controller
@@ -48,12 +48,6 @@ class ResumeController extends Controller
                 'file_path' => $url,
             ]);
 
-            $file = $request->file('pdf');
-
-            // $aiResult = $this->resumeTransactionUtil->callAISummarizePdf($file);
-
-            // $data = $this->resumeTransactionUtil->storeSummarizeData($aiResult, $resume);
-
             $text = $this->resumeTransactionUtil->extractTedx($request);
 
             $aiResult = $this->askGemini($text);
@@ -62,12 +56,15 @@ class ResumeController extends Controller
 
             $aiResult = json_decode(trim($cleanJson), true);
 
-            $data = $this->resumeTransactionUtil->newStoreDataSummarizeData($aiResult, $resume);
+            $parsedData = $this->resumeTransactionUtil->newStoreDataSummarizeData($aiResult, $resume);
+
+            $job_recommendations = $this->resumeTransactionUtil->getRecommendationsJobs($user_id, $resume, $parsedData);
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Resume uploaded and analyzed successfully',
-                'parsed_data' => $aiResult
+                'parsed_data' => $aiResult,
+                'job_recommendations' => $job_recommendations
             ], 201);
         } catch (\Illuminate\Http\Client\RequestException $e) {
             return response()->json([
@@ -85,31 +82,41 @@ class ResumeController extends Controller
     public function summarizePdf(Request $request)
     {
         try {
-            $path = $request->file('pdf')->store('pdf', 'public');
+            $request->validate([
+                'pdf' => 'required|mimes:pdf,doc,docx|max:10240',
+            ]);
 
+            $user_id = Auth::id() ?? 1;
+
+            $path = $request->file('pdf')->store('pdf', 'public');
             $url = '/storage/' . $path;
 
             $resume = Resume::create([
-                'user_id' => 4,
+                'user_id' => $user_id,
                 'file_path' => $url,
             ]);
 
             $text = $this->resumeTransactionUtil->extractTedx($request);
+            $ai_result_raw = $this->askGemini($text);
 
-            $aiResult = $this->askGemini($text);
+            $cleanJson = str_replace(['```json', '```'], '', $ai_result_raw);
+            $ai_result = json_decode(trim($cleanJson), true);
 
-            $cleanJson = str_replace(['```json', '```'], '', $aiResult);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new Exception('AI generated invalid JSON: ' . json_last_error_msg());
+            }
 
-            $aiResult = json_decode(trim($cleanJson), true);
+            $parsed_data = DB::transaction(function () use ($ai_result, $resume) {
+                return $this->resumeTransactionUtil->newStoreDataSummarizeData($ai_result, $resume);
+            });
 
-            $data = $this->resumeTransactionUtil->newStoreDataSummarizeData($aiResult, $resume);
+            $job_recommendations = $this->resumeTransactionUtil->getRecommendationsJobs($user_id, $resume, $parsed_data);
 
-            return view('test_pdf.pdf_upload', compact('aiResult'));
-        } catch (\Illuminate\Http\Client\RequestException $e) {
-            return response()->json([
-                'error' => 'AI MODULE failed',
-                'message' => $e->getMessage()
-            ], 500);
+            return view('test_pdf.pdf_upload', compact('ai_result', 'job_recommendations'));
+
+        } catch (Exception $e) {
+            \Log::error('Summarize PDF Error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to process resume: ' . $e->getMessage());
         }
     }
 
@@ -153,87 +160,34 @@ class ResumeController extends Controller
         return $data['candidates'][0]['content']['parts'][0]['text'] ?? 'No response generated.';
     }
 
-    public function ollamRead($text)
-    {
-        $base64Text = base64_encode($text);
-
-        $model = 'llama3.2:1b';
-
-        $prompt = "
-                You are a professional CV analyzer. Analyze the following CV text and return a VALID JSON object with fields:
-                - experiences (array of strings)
-                - soft_skills (array of strings)
-                - technical_skills (array of strings)
-                - weaknesses (array of strings)
-                - summary (short paragraph)
-                - strengths (array of strings)
-                - certifications (array of strings)
-
-                CV Text:
-                \"\"\"{$base64Text}\"\"\"
-                ";
-
-        $response = Http::timeout(180)->post(
-            'http://44.220.55.233:11434/api/generate',
-            [
-                'model' => 'llama3.2:1b',
-                'prompt' => $prompt,
-                'stream' => false,
-                'format' => 'json'
-            ]
-        );
-
-        if ($response->successful()) {
-            $data = $response->json();
-            dd($data);
-            return $data;
-        } else {
-            return $response->body();
-        }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function getProfileData($user_id)
     {
         try {
-            $user = User::with(['cv_lists' => function ($query) {
-                $query->latest();
-            }, 'cv_lists.parsedData' => function ($query) {
-                $query->with(['strengths', 'weaknesses', 'technical_skills', 'soft_skills', 'certificates', 'experiences', 'job_recommendations']);
-            }])->findOrFail($user_id);
 
-            $latestResume = $user->cv_lists->first();
-
-            if (!$latestResume || !$latestResume->parsedData) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'No parsed resume found for this user'
-                ], 404);
-            }
-
-            $parsedData = $latestResume->parsedData;
-
-            return response()->json([
-                'status' => 'success',
-                'data' => [
-                    'strengths' => $parsedData->strengths->pluck('description'),
-                    'weaknesses' => $parsedData->weaknesses->pluck('description'),
-                    'skills' => $parsedData->technical_skills->pluck('description'),
-                    'soft_skills' => $parsedData->soft_skills->pluck('description'),
-                    'certificates' => $parsedData->certificates->pluck('description'),
-                    'experiences' => $parsedData->experiences->pluck('description'),
-                    'summary' => $parsedData->summary_text,
-                    'job_recommendations' => $parsedData->experiences->pluck('description', 'job_title', 'match_score'),
-                ]
-            ]);
+            //get profile data
+            $this->resumeTransactionUtil->getProfileData($user_id);
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Failed to retrieve profile data',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function getRecommendations()
+    {
+        try {
+            $user_id = 1;
+
+            $response = $this->resumeTransactionUtil->getRecommendationsJobs($user_id);
+
+            return response()->json([
+                'status' => 'success',
+                'matched_jobs' => $response
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 

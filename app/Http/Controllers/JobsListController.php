@@ -71,6 +71,7 @@ class JobsListController extends Controller
                 'skills' => $request->skills,
                 'description' => $request->description,
                 'status' => $request->status ?? 'active',
+                'link' => $request->link,
                 'post_date' => Carbon::parse($request->post_date),
                 'closing_date' => Carbon::parse($request->closing_date),
             ]);
@@ -135,6 +136,7 @@ class JobsListController extends Controller
                 'closing_date' => Carbon::parse($validated['closing_date']),
                 'description' => $validated['description'] ?? null,
                 'status' => $validated['status'],
+                'link' => $request->link,
             ]);
 
             DB::commit();
