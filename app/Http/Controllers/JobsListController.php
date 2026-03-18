@@ -181,6 +181,7 @@ class JobsListController extends Controller
 
             return redirect()->route('jobs.index')->with('success', 'Jobs imported successfully.');
         } catch (\Throwable $e) {
+            dd($e);
             Log::error('Job Import Error', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
