@@ -201,7 +201,7 @@ class ResumeController extends Controller
             $user = User::with(['cv_lists' => function ($query) {
                 $query->latest();
             }, 'cv_lists.parsedData' => function ($query) {
-                $query->with(['strengths', 'weaknesses', 'technical_skills', 'soft_skills', 'certificates', 'experiences']);
+                $query->with(['strengths', 'weaknesses', 'technical_skills', 'soft_skills', 'certificates', 'experiences', 'job_recommendations']);
             }])->findOrFail($user_id);
 
             $latestResume = $user->cv_lists->first();
@@ -224,7 +224,8 @@ class ResumeController extends Controller
                     'soft_skills' => $parsedData->soft_skills->pluck('description'),
                     'certificates' => $parsedData->certificates->pluck('description'),
                     'experiences' => $parsedData->experiences->pluck('description'),
-                    'summary' => $parsedData->summary_text
+                    'summary' => $parsedData->summary_text,
+                    'job_recommendations' => $parsedData->experiences->pluck('description', 'job_title', 'match_score'),
                 ]
             ]);
         } catch (Exception $e) {
