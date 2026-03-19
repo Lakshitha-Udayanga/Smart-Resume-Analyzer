@@ -225,7 +225,13 @@ class ResumeTransactionUtil
                 'certificates' => $parsedData->certificates->pluck('description'),
                 'experiences' => $parsedData->experiences->pluck('description'),
                 'summary' => $parsedData->summary_text,
-                'job_recommendations' => $parsedData->experiences->pluck('description', 'job_title', 'match_score'),
+                'job_recommendations' => $parsedData->job_recommendations->map(function ($item) {
+                    return [
+                        'job_title' => $item->job_title,
+                        'match_score' => $item->match_score,
+                        'company_name' => $item->company_name
+                    ];
+                }),
             ]
         ]);
     }

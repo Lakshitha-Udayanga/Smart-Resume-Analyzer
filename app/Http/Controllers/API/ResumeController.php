@@ -11,6 +11,7 @@ use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use App\Models\User;
 
 class ResumeController extends Controller
 {
@@ -165,7 +166,7 @@ class ResumeController extends Controller
         try {
 
             //get profile data
-            $this->resumeTransactionUtil->getProfileData($user_id);
+            return $this->resumeTransactionUtil->getProfileData($user_id);
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
