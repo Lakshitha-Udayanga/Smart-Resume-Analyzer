@@ -203,20 +203,22 @@ class ResumeTransactionUtil
             $query->with(['strengths', 'weaknesses', 'technical_skills', 'soft_skills', 'certificates', 'experiences', 'job_recommendations']);
         }])->findOrFail($user_id);
 
-        $latestResume = $user->cv_lists->first();
-
-        if (!$latestResume || !$latestResume->parsedData) {
+        if ($user->cv_lists->isEmpty()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'No parsed resume found for this user'
+                'message' => 'No resumes found for this user'
             ], 404);
         }
 
-        $parsedData = $latestResume->parsedData;
+        $allCvData = $user->cv_lists->map(function ($resume) {
+            $parsedData = $resume->parsedData;
+            
+            if (!$parsedData) {
+                return null;
+            }
 
-        return response()->json([
-            'status' => 'success',
-            'data' => [
+            return [
+                'cv_url' => asset($resume->file_path),
                 'strengths' => $parsedData->strengths->pluck('description'),
                 'weaknesses' => $parsedData->weaknesses->pluck('description'),
                 'skills' => $parsedData->technical_skills->pluck('description'),
@@ -231,7 +233,19 @@ class ResumeTransactionUtil
                         'company_name' => $item->company_name
                     ];
                 }),
-            ]
+            ];
+        })->filter()->values();
+
+        if ($allCvData->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No parsed resumes found for this user'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $allCvData
         ]);
     }
 
