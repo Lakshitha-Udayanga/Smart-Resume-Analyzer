@@ -88,6 +88,7 @@
                                 <th>Job Type</th>
                                 <th>Job Location</th>
                                 <th>Closing Date</th>
+                                <th>Education</th>
                                 <th>Skills</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -104,6 +105,7 @@
                                     <td>{{ $job->job_type }}</td>
                                     <td>{{ $job->location }}</td>
                                     <td>{{ $job->closing_date }}</td>
+                                    <td>{{ Str::limit($job->education_certificate, 50) }}</td>
                                     <td>{{ Str::limit($job->skills, 50) }}</td>
                                     <td>
                                         @if ($job->status == 'active')
@@ -165,7 +167,7 @@
                             <input type="file" name="file" class="form-control" id="file" required>
                         </div>
                         <div class="text-muted small">
-                            Expected columns: job_position_name, company_name, department_category, job_location, salary_min, salary_max, experience_level, skills, post_date, closing_date
+                            Expected columns: job_position_name, company_name, payment_category, job_location, salary_min, salary_max, experience_level, skills, education_certificate, post_date, closing_date, link
                         </div>
                     </div>
                     <div class="modal-footer">

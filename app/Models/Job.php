@@ -22,6 +22,7 @@ class Job extends Model
         'description',
         'status',
         'link',
+        'education_certificate',
         'post_date',
         'closing_date'
     ];

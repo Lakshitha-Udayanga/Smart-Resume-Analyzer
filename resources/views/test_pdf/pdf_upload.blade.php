@@ -102,8 +102,8 @@
                                 Skills
                             </div>
                             <div class="card-body">
-                                @if (!empty($ai_result['skills']))
-                                    @foreach ($ai_result['skills'] as $skill)
+                                @if (!empty($ai_result['technical_skills']))
+                                    @foreach ($ai_result['technical_skills'] as $skill)
                                         <span class="badge bg-secondary me-2 mb-2">
                                             {{ $skill }}
                                         </span>
@@ -121,9 +121,9 @@
                                 Certificates
                             </div>
                             <div class="card-body">
-                                @if (!empty($ai_result['certificates']))
+                                @if (!empty($ai_result['certifications']))
                                     <ul class="list-group list-group-flush">
-                                        @foreach ($ai_result['certificates'] as $cert)
+                                        @foreach ($ai_result['certifications'] as $cert)
                                             <li class="list-group-item">
                                                 📜 {{ $cert }}
                                             </li>
@@ -214,6 +214,7 @@
                                                     <strong>Matched Skills:</strong>
                                                     {{ implode(', ', $rec['matched_skills'] ?? []) }}
                                                 </small>
+                                                <p class="mb-1 text-muted">{{ $rec['link']  ?? ''}}</p>
                                             </div>
                                         @endforeach
                                     </div>

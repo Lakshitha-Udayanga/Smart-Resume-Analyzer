@@ -26,6 +26,7 @@ class JobsImport implements ToModel, WithHeadingRow
             'salary_max'       => $row['salary_max'],
             'experience_level' => $row['experience_level'],
             'skills'           => $row['skills'],
+            'education_certificate' => $row['education_certificate'],
             'description'      => $row['description'] ?? null,
             'status'           => $row['status'] ?? 'active',
             'link'             => $row['link'] ?? null,

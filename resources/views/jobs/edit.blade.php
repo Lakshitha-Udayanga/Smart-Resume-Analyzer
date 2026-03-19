@@ -67,14 +67,8 @@
                         <!-- Experience Level -->
                         <div class="col-md-3">
                             <label class="form-label">Experience Level</label>
-                            <select name="experience_level" class="form-select">
-                                <option value="">Select</option>
-                                <option value="Entry" {{ $job->experience_level == 'Entry' ? 'selected' : '' }}>Entry
-                                </option>
-                                <option value="Mid" {{ $job->experience_level == 'Mid' ? 'selected' : '' }}>Mid</option>
-                                <option value="Senior" {{ $job->experience_level == 'Senior' ? 'selected' : '' }}>Senior
-                                </option>
-                            </select>
+                            <input type="text" name="salary_max" class="form-control"
+                                value="{{ old('experience_level', $job->experience_level) }}">
                         </div>
 
                         <div class="col-md-3">
@@ -109,7 +103,13 @@
                         <!-- Skills -->
                         <div class="col-md-6">
                             <label class="form-label">Skills (comma separated)</label>
-                            <textarea name="skills" class="form-control" rows="2" placeholder="PHP, Laravel, MySQL">{{ old('description', $job->skills) }}</textarea>
+                            <textarea name="skills" class="form-control" rows="2" placeholder="PHP, Laravel, MySQL">{{ old('skills', $job->skills) }}</textarea>
+                        </div>
+
+                        <!-- Education -->
+                        <div class="col-md-6">
+                            <label class="form-label">Education / Certificate</label>
+                            <textarea name="education_certificate" class="form-control" rows="2">{{ old('education_certificate', $job->education_certificate) }}</textarea>
                         </div>
 
                         <div class="col-md-6">

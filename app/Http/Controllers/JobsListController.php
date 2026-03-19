@@ -69,6 +69,7 @@ class JobsListController extends Controller
                 'salary_max' => $request->salary_max,
                 'experience_level' => $request->experience_level,
                 'skills' => $request->skills,
+                'education_certificate' => $request->education_certificate,
                 'description' => $request->description,
                 'status' => $request->status ?? 'active',
                 'link' => $request->link,
@@ -137,6 +138,7 @@ class JobsListController extends Controller
                 'description' => $validated['description'] ?? null,
                 'status' => $validated['status'],
                 'link' => $request->link,
+                'education_certificate' => $request->education_certificate,
             ]);
 
             DB::commit();
@@ -181,6 +183,7 @@ class JobsListController extends Controller
 
             return redirect()->route('jobs.index')->with('success', 'Jobs imported successfully.');
         } catch (\Throwable $e) {
+            dd($e);
             Log::error('Job Import Error', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),

@@ -158,14 +158,13 @@ class ResumeTransactionUtil
         $user_profile = implode(" ", [
             $parsed_data->summary_text,
             implode(" ", $parsed_data->strengths->pluck('description')->toArray()),
-            implode(" ", $parsed_data->weaknesses->pluck('description')->toArray()),
             implode(" ", $parsed_data->technical_skills->pluck('description')->toArray()),
             implode(" ", $parsed_data->soft_skills->pluck('description')->toArray()),
             implode(" ", $parsed_data->certificates->pluck('description')->toArray()),
             implode(" ", $parsed_data->experiences->pluck('description')->toArray()),
         ]);
 
-        $jobs = Job::select('id', 'title', 'company_name', 'skills', 'experience_level','link')->get();
+        $jobs = Job::select('id', 'title', 'company_name', 'skills', 'experience_level', 'education_certificate', 'link')->get();
 
         $response = Http::timeout(120)->post('http://50.17.87.226:5000/match-jobs', [
             'user_profile' => $user_profile,

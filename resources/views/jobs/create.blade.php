@@ -68,12 +68,7 @@
                         <!-- Experience Level -->
                         <div class="col-md-3">
                             <label class="form-label">Experience Level</label>
-                            <select name="experience_level" class="form-select">
-                                <option value="">Select</option>
-                                <option value="Entry">Entry</option>
-                                <option value="Mid">Mid</option>
-                                <option value="Senior">Senior</option>
-                            </select>
+                             <input type="text" name="salary_max" class="form-control">
                         </div>
 
                         <div class="col-md-3">
@@ -106,6 +101,12 @@
                         <div class="col-md-6">
                             <label class="form-label">Skills (comma separated)</label>
                             <textarea name="skills" class="form-control" rows="2" placeholder="PHP, Laravel, MySQL"></textarea>
+                        </div>
+
+                        <!-- Education -->
+                        <div class="col-md-6">
+                            <label class="form-label">Education / Certificate</label>
+                            <textarea name="education_certificate" class="form-control" rows="2" placeholder="Bachelor's Degree in Computer Science, AWS Certified"></textarea>
                         </div>
 
                         <!-- Description -->

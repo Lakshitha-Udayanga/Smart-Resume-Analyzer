@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use App\Models\Resume;
 use App\Utils\ResumeTransactionUtil;
 use Exception;
-use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -110,11 +109,9 @@ class ResumeController extends Controller
             $parsed_data = DB::transaction(function () use ($ai_result, $resume) {
                 return $this->resumeTransactionUtil->newStoreDataSummarizeData($ai_result, $resume);
             });
-
             $job_recommendations = $this->resumeTransactionUtil->getRecommendationsJobs($user_id, $resume, $parsed_data);
 
             return view('test_pdf.pdf_upload', compact('ai_result', 'job_recommendations'));
-
         } catch (Exception $e) {
             \Log::error('Summarize PDF Error: ' . $e->getMessage());
             return back()->with('error', 'Failed to process resume: ' . $e->getMessage());
@@ -153,9 +150,8 @@ class ResumeController extends Controller
             ]);
 
         if ($response->failed()) {
-            return "Error: " . $response->body();
+            throw new Exception('Gemini Error: ' . $response->json('error.message'));
         }
-
         $data = $response->json();
 
         return $data['candidates'][0]['content']['parts'][0]['text'] ?? 'No response generated.';
