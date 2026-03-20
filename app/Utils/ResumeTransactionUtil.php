@@ -187,6 +187,7 @@ class ResumeTransactionUtil
                         'company_name' => $rec['company_name'] ?? '',
                         'match_score' => $rec['final_score'] ?? 0,
                         'matched_skills' => isset($rec['matched_skills']) ? json_encode($rec['matched_skills']) : null,
+                        'link' => isset($rec['link']) ? $rec['link'] : null,
                     ]
                 );
             }
@@ -212,7 +213,7 @@ class ResumeTransactionUtil
 
         $allCvData = $user->cv_lists->map(function ($resume) {
             $parsedData = $resume->parsedData;
-            
+
             if (!$parsedData) {
                 return null;
             }
