@@ -231,7 +231,9 @@ class ResumeTransactionUtil
                     return [
                         'job_title' => $item->job_title,
                         'match_score' => $item->match_score,
-                        'company_name' => $item->company_name
+                        'company_name' => $item->company_name,
+                        'matched_skills' => isset($item->matched_skills) ? json_encode($item->matched_skills) : null,
+                        'link' => $item->link ?? null
                     ];
                 }),
             ];
