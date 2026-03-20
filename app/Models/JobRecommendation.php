@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class JobRecommendation extends Model
 {
-    protected $fillable = ['parsed_data_id', 'job_id', 'job_title', 'company_name', 'job_description', 'match_score', 'matched_skills'];
+    protected $fillable = ['parsed_data_id', 'job_id', 'job_title', 'company_name', 'job_description', 'match_score', 'matched_skills', 'link'];
 
     public function parsedData()
     {
