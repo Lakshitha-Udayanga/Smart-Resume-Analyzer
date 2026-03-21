@@ -13,6 +13,8 @@ class Job(BaseModel):
     company_name: str
     skills: str
     experience_level: str
+    education_certificate: str = ""
+    link: str = ""
 
 class RecommendationRequest(BaseModel):
     user_profile: str
@@ -29,7 +31,9 @@ def match_jobs(data: RecommendationRequest):
         jobs_df['job_info'] = (
             jobs_df['title'] + " " +
             jobs_df['skills'] + " " +
-            jobs_df['experience_level']
+            jobs_df['experience_level'] + " " +
+            jobs_df['education_certificate']
+
         )
 
         tfidf = TfidfVectorizer(stop_words='english')
@@ -66,10 +70,11 @@ def match_jobs(data: RecommendationRequest):
 
         jobs_df['exp_score'] = jobs_df['experience_level'].apply(experience_score)
 
+
         jobs_df['final_score'] = (
             jobs_df['tfidf_score'] * 0.5 +
-            jobs_df['skill_score'] * 0.3 +
-            jobs_df['exp_score'] * 0.2
+            jobs_df['skill_score'] * 0.5 +
+            jobs_df['exp_score'] * 0.3
         )
 
         jobs_df['final_score'] = (jobs_df['final_score'] * 100).round(2)
@@ -84,7 +89,7 @@ def match_jobs(data: RecommendationRequest):
         top_jobs = jobs_df.sort_values(by='final_score', ascending=False).head(3)
 
         return top_jobs[
-            ['id', 'title', 'company_name', 'final_score', 'matched_skills']
+            ['id', 'title', 'company_name', 'final_score', 'matched_skills', 'link']
         ].to_dict(orient='records')
 
     except Exception as e:

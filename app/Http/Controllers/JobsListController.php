@@ -20,8 +20,17 @@ class JobsListController extends Controller
         $post_date = request()->input('post_date');
         $closing_date = request()->input('closing_date');
         $perPage = request()->input('per_page', 10);
+        $search = request()->input('search');
 
         $query = Job::query();
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'LIKE', "%{$search}%")
+                  ->orWhere('company_name', 'LIKE', "%{$search}%")
+                  ->orWhere('location', 'LIKE', "%{$search}%");
+            });
+        }
 
         if ($status && $status != 'all') {
             $query->where('status', $status);

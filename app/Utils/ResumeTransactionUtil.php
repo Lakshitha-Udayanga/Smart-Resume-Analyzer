@@ -128,6 +128,64 @@ class ResumeTransactionUtil
         return $text;
     }
 
+    public function findBestMatch($ai_result, $endpoint, $parsed_data_id = null)
+    {
+        $jobs_data = Job::select('id', 'title', 'company_name', 'skills', 'experience_level', 'education_certificate', 'link')->limit(100)->get();
+
+        $prompt = "Compare this CV data: " . json_encode($ai_result) .
+            " with this Jobs List: " . json_encode($jobs_data) .
+            ". Identify the top 3 best matching jobs. Return ONLY a VALID JSON array of objects, where each object contains:
+                'job_id',
+                'final_score',
+                'matched_skills' (This must be a JSON array of strings, e.g., [\"PHP\", \"Laravel\"]),
+                'company_name',
+                'title',
+                'link'.
+                The response must be a plain JSON array.";
+
+        $response = Http::timeout(120)->withHeaders([
+            'Content-Type' => 'application/json',
+        ])->post($endpoint, [
+            'contents' => [
+                [
+                    'parts' => [
+                        ['text' => $prompt]
+                    ]
+                ]
+            ],
+            'generationConfig' => [
+                'responseMimeType' => 'application/json'
+            ]
+        ]);
+
+        if ($response->successful()) {
+            $responseText = $response->json()['candidates'][0]['content']['parts'][0]['text'];
+            $result = json_decode(trim($responseText), true);
+
+            if ($parsed_data_id && is_array($result)) {
+                foreach ($result as $rec) {
+                    JobRecommendation::updateOrCreate(
+                        [
+                            'parsed_data_id' => $parsed_data_id,
+                            'job_id' => $rec['job_id'] ?? null,
+                        ],
+                        [
+                            'job_title' => $rec['job_title'] ?? '',
+                            'company_name' => $rec['company_name'] ?? '',
+                            'match_score' => (int)str_replace('%', '', $rec['final_score'] ?? '0'),
+                            'matched_skills' => isset($rec['matched_skills']) ? json_encode($rec['matched_skills']) : null,
+                            'link' => $rec['link'] ?? null,
+                        ]
+                    );
+                }
+            }
+
+            return $result;
+        }
+
+        return [];
+    }
+
     public function getRecommendationsJobs($user_id, $resume = null, $parsed_data = null)
     {
         if (!$parsed_data) {

@@ -4,20 +4,46 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Exports\ClientResumeExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ClientListController extends Controller
 {
 
+    public function exportExcel()
+    {
+        return Excel::download(new ClientResumeExport, 'clients_resumes.xlsx');
+    }
+
     public function index()
     {
-        $users = User::query();
+        $users = User::query()->where('is_system_user', 0);
         $perPage = request()->input('per_page', 10);
+        $search = request()->input('search');
+        $start_date = request()->input('start_date');
+        $end_date = request()->input('end_date');
 
-        $users = $users->where('is_system_user', 0)->orderBy('created_at', 'desc')
+        if ($search) {
+            $users->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('phone', 'LIKE', "%{$search}%")
+                  ->orWhere('user_ref_no', 'LIKE', "%{$search}%");
+            });
+        }
+
+        if ($start_date && $end_date) {
+            $users->whereBetween('created_at', [
+                \Carbon\Carbon::parse($start_date)->startOfDay(),
+                \Carbon\Carbon::parse($end_date)->endOfDay()
+            ]);
+        }
+
+        $users = $users->orderBy('created_at', 'desc')
             ->paginate($perPage)
             ->appends(request()->all());
 
-        return view('registered_client.index', compact('users', 'perPage'));
+        return view('registered_client.index', compact('users', 'perPage', 'search', 'start_date', 'end_date'));
     }
 
     public function create()

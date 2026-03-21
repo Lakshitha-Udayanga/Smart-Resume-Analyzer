@@ -5,16 +5,37 @@
 
 @section('wrapper')
     <div class="container-fluid">
-        <!-- ================= TABLE CARD ================= -->
         <div class="card smart-card">
             <div class="card-header smart-card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0 text-primary fw-semibold">
                     <i class="bx bx-group me-1"></i> View All Clients
                 </h6>
+                <a href="{{ route('client.export') }}" class="btn btn-sm btn-success">
+                    <i class="bx bx-export me-1"></i> Export Excel
+                </a>
             </div>
 
             <div class="card-body">
-                <!-- SHOW ENTRIES -->
+                <form method="GET" class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="start_date" class="form-control" value="{{ $start_date ?? '' }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="end_date" class="form-control" value="{{ $end_date ?? '' }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Search</label>
+                        <input type="text" name="search" class="form-control" value="{{ $search ?? '' }}"
+                            placeholder="Name, Email, Phone, Ref No...">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                        <a href="{{ route('client.index') }}" class="btn btn-danger w-100">Reset</a>
+                    </div>
+                </form>
+
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <form method="GET" id="perPageForm">
                         @foreach (request()->except('per_page') as $key => $value)
@@ -36,7 +57,6 @@
                     </form>
                 </div>
 
-                <!-- TABLE -->
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle">
                         <thead class="table-light">
@@ -71,7 +91,6 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- Pagination Links -->
                 <div class="d-flex justify-content-between align-items-center mt-3">
                     <div>
                         Showing {{ $users->firstItem() }} to {{ $users->lastItem() }} of

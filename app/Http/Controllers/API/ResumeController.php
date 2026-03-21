@@ -11,9 +11,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use App\Models\User;
+use App\Exports\ResumeDataExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ResumeController extends Controller
 {
+    public function exportResumes()
+    {
+        return Excel::download(new ResumeDataExport, 'resumes_data.xlsx');
+    }
     protected $resumeTransactionUtil;
 
     protected $moduleUtil;
@@ -58,7 +64,7 @@ class ResumeController extends Controller
 
             $parsedData = $this->resumeTransactionUtil->newStoreDataSummarizeData($aiResult, $resume);
 
-            $job_recommendations = $this->resumeTransactionUtil->getRecommendationsJobs($user_id, $resume, $parsedData);
+            $job_recommendations = $this->resumeTransactionUtil->findBestMatch($aiResult, $this->endpoint, $parsedData->id);
 
             return response()->json([
                 'status' => 'success',
@@ -109,7 +115,12 @@ class ResumeController extends Controller
             $parsed_data = DB::transaction(function () use ($ai_result, $resume) {
                 return $this->resumeTransactionUtil->newStoreDataSummarizeData($ai_result, $resume);
             });
-            $job_recommendations = $this->resumeTransactionUtil->getRecommendationsJobs($user_id, $resume, $parsed_data);
+
+            //get recomment job using gemini
+            // $job_recommendations = $this->resumeTransactionUtil->findBestMatch($ai_result, $this->endpoint, $parsed_data->id);
+            $job_recommendations = [];
+
+            // $job_recommendations = $this->resumeTransactionUtil->getRecommendationsJobs($user_id, $resume, $parsed_data);
 
             return view('test_pdf.pdf_upload', compact('ai_result', 'job_recommendations'));
         } catch (Exception $e) {

@@ -34,6 +34,11 @@
                             <option value="inactive" {{ ($status ?? '') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                         </select>
                     </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Search</label>
+                        <input type="text" name="search" class="form-control" value="{{ request('search') }}"
+                            placeholder="Title, Company, Location...">
+                    </div>
                     <div class="col-md-3 d-flex align-items-end">
                         <button type="submit" class="btn btn-primary">Filter</button> &nbsp;&nbsp;
                         <button type="submit" class="btn btn-danger">Reset</button>

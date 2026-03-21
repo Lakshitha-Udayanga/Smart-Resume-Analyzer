@@ -39,6 +39,9 @@
                             <li><a class="dropdown-item" href="{{ url('registered/client') }}"><i
                                         class='bx bx-user-voice'></i>
                                     Client List</a></li>
+                            <li><a class="dropdown-item" href="{{ url('resumes') }}"><i
+                                        class='bx bx-file'></i>
+                                    Resume List</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
@@ -50,10 +53,17 @@
                             <div class="ms-auto dropy-icon"><i class='bx bx-chevron-down'></i></div>
                         </a>
                         <ul class="dropdown-menu">
-                            <li> <a class="dropdown-item" href="{{ url('jobs') }}"><i
-                                        class='bx bx-layer'></i>Jobs List</a>
+                            <li> <a class="dropdown-item" href="{{ url('jobs') }}"><i class='bx bx-layer'></i>Jobs
+                                    List</a>
                             </li>
                         </ul>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('training.index') }}">
+                            <div class="parent-icon"><i class='bx bx-brain'></i></div>
+                            <div class="menu-title d-flex align-items-center">Data training</div>
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url('view-pdf') }}">
@@ -61,6 +71,7 @@
                             <div class="menu-title d-flex align-items-center">Unit Testing</div>
                         </a>
                     </li>
+
                     <li class="nav-item dropdown" hidden>
                         <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"
                             data-bs-toggle="dropdown">
@@ -95,14 +106,14 @@
                                 </ul>
                             </li>
                             <li class="nav-item dropend">
-                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"><i
-                                        class='bx bx-card'></i>Content</a>
+                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret"
+                                    href="javascript:;"><i class='bx bx-card'></i>Content</a>
                                 <ul class="dropdown-menu submenu">
                                 </ul>
                             </li>
                             <li class="nav-item dropend">
-                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"><i
-                                        class='bx bx-droplet'></i>Icons</a>
+                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret"
+                                    href="javascript:;"><i class='bx bx-droplet'></i>Icons</a>
                                 <ul class="dropdown-menu submenu">
                                 </ul>
                             </li>

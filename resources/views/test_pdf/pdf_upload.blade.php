@@ -14,9 +14,14 @@
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Upload PDF to Summarize</h2>
-            <a href="{{ url('/dashboard') }}" class="btn btn-outline-primary d-flex align-items-center gap-2">
-                <i class='bx bx-arrow-back'></i> Back to Dashboard
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ url('/dashboard') }}" class="btn btn-outline-primary d-flex align-items-center gap-2">
+                    <i class='bx bx-arrow-back'></i> Back to Dashboard
+                </a>
+                <a href="{{ route('resumes.export') }}" class="btn btn-success btn-sm d-flex align-items-center gap-2">
+                    <i class="bx bx-file me-1"></i> Export to CV Details
+                </a>
+            </div>
         </div>
 
         @if (session('success'))
@@ -42,8 +47,11 @@
         @if (isset($ai_result))
             <div class="mt-5">
                 <div class="card shadow mb-4">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Professional Summary</h5>
+                        <a href="{{ route('resumes.export') }}" class="btn btn-light btn-sm">
+                            <i class="bx bx-file me-1"></i> Export CV Data
+                        </a>
                     </div>
                     <div class="card-body">
                         {{ $ai_result['summary'] ?? 'No summary available.' }}
