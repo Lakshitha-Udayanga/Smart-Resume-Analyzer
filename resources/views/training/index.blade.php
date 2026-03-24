@@ -80,6 +80,9 @@
                                 <i class='bx bx-briefcase-alt-2' style="font-size: 24px;"></i> View All Training Data
                             </h5>
                             <div class="d-flex gap-2">
+                                {{-- <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#importExcelModal" style="border-radius: 8px; font-weight: 500; display: none;">
+                                    <i class='bx bx-import'></i> Import Excel
+                                </button> --}}
                                 <a href="{{ route('training.export') }}" class="btn btn-success btn-sm d-flex align-items-center gap-2" style="border-radius: 8px; font-weight: 500;">
                                     <i class='bx bx-export'></i> Export Excel
                                 </a>
@@ -216,6 +219,42 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Excel Modal -->
+    <div class="modal fade" id="importExcelModal" tabindex="-1" aria-labelledby="importExcelModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-primary" id="importExcelModalLabel">Import Training Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('training.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body p-4">
+                        <div class="mb-4 text-center">
+                            <i class='bx bx-file-blank text-primary' style="font-size: 64px;"></i>
+                            <p class="text-muted mt-2">Select an Excel or CSV file to import training records.</p>
+                        </div>
+
+                        <div class="alert alert-info border-0 bg-light-info mb-4" style="font-size: 0.85rem;">
+                            <i class='bx bx-info-circle me-1'></i>
+                            <strong>Required Columns:</strong> skills, experiences, certificates, matching_job_list
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="excelFile" class="form-label fw-bold">Choose File</label>
+                            <input class="form-control" type="file" id="excelFile" name="file" accept=".xlsx,.xls,.csv" required>
+                            <div class="form-text mt-2 text-muted">Max file size: 2MB</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 8px;">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4" style="border-radius: 8px;">Upload & Import</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

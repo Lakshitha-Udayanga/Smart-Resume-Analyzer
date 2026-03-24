@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\API\LoginController;
 use App\Http\Controllers\API\RegisterController;
 use App\Http\Controllers\API\ResumeController;
+use App\Http\Controllers\API\JobController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Monolog\Registry;
@@ -35,3 +36,4 @@ Route::middleware('auth.apiToken')->group(function () {
     Route::get('/users', [LoginController::class, 'index']);
     Route::post('/update/user/{id}', [RegisterController::class, 'update']);
 });
+Route::get('/getjobs', [JobController::class, 'index']);

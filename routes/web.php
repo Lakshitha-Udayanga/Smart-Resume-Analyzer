@@ -46,4 +46,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/data-training', [TrainingController::class, 'index'])->name('training.index');
     Route::post('/data-training/process', [TrainingController::class, 'process'])->name('training.process');
     Route::get('/data-training/export', [TrainingController::class, 'export'])->name('training.export');
+    Route::post('/data-training/import', [TrainingController::class, 'import'])->name('training.import');
 });

@@ -118,9 +118,9 @@ class ResumeController extends Controller
 
             //get recomment job using gemini
             // $job_recommendations = $this->resumeTransactionUtil->findBestMatch($ai_result, $this->endpoint, $parsed_data->id);
-            $job_recommendations = [];
+            // $job_recommendations = [];
 
-            // $job_recommendations = $this->resumeTransactionUtil->getRecommendationsJobs($user_id, $resume, $parsed_data);
+            $job_recommendations = $this->resumeTransactionUtil->getRecommendationsJobs($user_id, $resume, $parsed_data);
 
             return view('test_pdf.pdf_upload', compact('ai_result', 'job_recommendations'));
         } catch (Exception $e) {

@@ -222,12 +222,21 @@ class ResumeTransactionUtil
             implode(" ", $parsed_data->experiences->pluck('description')->toArray()),
         ]);
 
-        $jobs = Job::select('id', 'title', 'company_name', 'skills', 'experience_level', 'education_certificate', 'link')->get();
+        // $jobs = Job::select('id', 'title', 'company_name', 'skills', 'experience_level', 'education_certificate', 'link')->get();
 
-        $response = Http::timeout(120)->post('http://50.17.87.226:5000/match-jobs', [
-            'user_profile' => $user_profile,
-            'jobs' => $jobs->toArray()
+        // $response = Http::timeout(120)->post('http://50.17.87.226:5000/match-jobs', [
+        //     'user_profile' => $user_profile,
+        //     'jobs' => $jobs->toArray()
+        // ]);
+
+        // ml model data
+        $response = Http::post('http://34.207.207.47:5000/recommend', [
+            'skills' => $parsed_data->technical_skills->pluck('description')->implode(', '),
+            'experience' => $parsed_data->experiences->pluck('description')->implode(', '),
+            'certificates' => $parsed_data->certificates->pluck('description')->implode(', ')
         ]);
+
+        dd($response->json());
 
         if ($response->failed()) {
             return [];

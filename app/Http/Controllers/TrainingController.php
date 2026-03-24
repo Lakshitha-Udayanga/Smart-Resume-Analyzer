@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\TrainingDataExport;
+use App\Imports\TrainingDataImport;
 
 class TrainingController extends Controller
 {
@@ -136,5 +137,20 @@ class TrainingController extends Controller
     public function export()
     {
         return Excel::download(new TrainingDataExport, 'training_dataset_' . date('Y-m-d_H-i-s') . '.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ]);
+
+        try {
+            Excel::import(new TrainingDataImport, $request->file('file'));
+            return back()->with('success', 'Training data imported successfully!');
+        } catch (\Exception $e) {
+            Log::error("Excel Import Error: " . $e->getMessage());
+            return back()->with('error', 'Error importing data: ' . $e->getMessage());
+        }
     }
 }
