@@ -16,7 +16,7 @@ class JobController extends Controller
     public function index()
     {
         try {
-            $jobs = Job::pluck('title')->unique()->values()->toArray();
+            $jobs = Job::pluck('title')->toArray();
 
             return response()->json([
                 'jobs' => $jobs
