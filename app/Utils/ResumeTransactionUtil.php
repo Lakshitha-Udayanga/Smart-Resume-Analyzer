@@ -213,6 +213,7 @@ class ResumeTransactionUtil
 
             $parsed_data = $latest_resume->parsedData;
         }
+
         $user_profile = implode(" ", [
             $parsed_data->summary_text,
             implode(" ", $parsed_data->strengths->pluck('description')->toArray()),
@@ -222,43 +223,37 @@ class ResumeTransactionUtil
             implode(" ", $parsed_data->experiences->pluck('description')->toArray()),
         ]);
 
-        // $jobs = Job::select('id', 'title', 'company_name', 'skills', 'experience_level', 'education_certificate', 'link')->get();
-
-        // $response = Http::timeout(120)->post('http://50.17.87.226:5000/match-jobs', [
-        //     'user_profile' => $user_profile,
-        //     'jobs' => $jobs->toArray()
-        // ]);
-
         // ml model data
         $response = Http::post('http://34.207.207.47:5000/recommend', [
-            'skills' => $parsed_data->technical_skills->pluck('description')->implode(', '),
-            'experience' => $parsed_data->experiences->pluck('description')->implode(', '),
-            'certificates' => $parsed_data->certificates->pluck('description')->implode(', ')
+            'skills' =>
+            $parsed_data->technical_skills->pluck('description')->implode(', ') . ', ' .
+                $parsed_data->soft_skills->pluck('description')->implode(', ') . ', ' .
+                $parsed_data->strengths->pluck('description')->implode(', '),
+            'experience' => $parsed_data->experiences->pluck('description')->implode(', ') . $parsed_data->summary_text,
+            'certificates' => $parsed_data->certificates->pluck('description')->implode(', '),
         ]);
-
-        dd($response->json());
 
         if ($response->failed()) {
             return [];
         }
 
-        if (is_array($response->json())) {
-            foreach ($response->json() as $rec) {
-                JobRecommendation::updateOrCreate(
-                    [
-                        'parsed_data_id' => $parsed_data->id,
-                        'job_id' => $rec['id'] ?? null,
-                    ],
-                    [
-                        'job_title' => $rec['title'] ?? '',
-                        'company_name' => $rec['company_name'] ?? '',
-                        'match_score' => $rec['final_score'] ?? 0,
-                        'matched_skills' => isset($rec['matched_skills']) ? json_encode($rec['matched_skills']) : null,
-                        'link' => isset($rec['link']) ? $rec['link'] : null,
-                    ]
-                );
-            }
-        }
+        // if (is_array($response->json())) {
+        //     foreach ($response->json() as $rec) {
+        //         JobRecommendation::updateOrCreate(
+        //             [
+        //                 'parsed_data_id' => $parsed_data->id,
+        //                 'job_id' => $rec['id'] ?? null,
+        //             ],
+        //             [
+        //                 'job_title' => $rec['title'] ?? '',
+        //                 'company_name' => $rec['company_name'] ?? '',
+        //                 'match_score' => $rec['final_score'] ?? 0,
+        //                 'matched_skills' => isset($rec['matched_skills']) ? json_encode($rec['matched_skills']) : null,
+        //                 'link' => isset($rec['link']) ? $rec['link'] : null,
+        //             ]
+        //         );
+        //     }
+        // }
 
         return $response->json();
     }

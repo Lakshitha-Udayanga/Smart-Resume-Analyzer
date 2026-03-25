@@ -62,9 +62,10 @@ class ResumeController extends Controller
 
             $aiResult = json_decode(trim($cleanJson), true);
 
-            $parsedData = $this->resumeTransactionUtil->newStoreDataSummarizeData($aiResult, $resume);
+            $parsed_data = $this->resumeTransactionUtil->newStoreDataSummarizeData($aiResult, $resume);
 
-            $job_recommendations = $this->resumeTransactionUtil->findBestMatch($aiResult, $this->endpoint, $parsedData->id);
+            // $job_recommendations = $this->resumeTransactionUtil->findBestMatch($aiResult, $this->endpoint, $parsedData->id);
+            $job_recommendations = $this->resumeTransactionUtil->getRecommendationsJobs($user_id, $resume, $parsed_data);
 
             return response()->json([
                 'status' => 'success',

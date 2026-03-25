@@ -187,7 +187,7 @@
                     </div>
                 </div>
 
-                @if (isset($job_recommendations) && count($job_recommendations) > 0)
+                @if (isset($job_recommendations['top_jobs']) && count($job_recommendations['top_jobs']) > 0)
                     <div class="row mb-5">
                         <div class="col-md-6">
                             <div class="card shadow mb-4">
@@ -209,20 +209,27 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="list-group list-group-flush">
-                                        @foreach ($job_recommendations as $rec)
+                                        @foreach ($job_recommendations['top_jobs'] as $rec)
                                             <div class="list-group-item">
-                                                <div class="d-flex w-100 justify-content-between">
-                                                    <h6 class="mb-1 text-primary">{{ $rec['title'] }}</h6>
-                                                    <span
-                                                        class="badge bg-success rounded-pill">{{ $rec['final_score'] }}%
-                                                        Match</span>
+                                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                                    <h6 class="mb-1 text-primary fw-bold">{{ $rec['job'] }}</h6>
+                                                    <span class="badge bg-success rounded-pill px-3 py-2">
+                                                        {{ number_format($rec['match_percentage'], 2) }}% Match
+                                                    </span>
                                                 </div>
-                                                <p class="mb-1 text-muted">{{ $rec['company_name'] }}</p>
-                                                <small class="text-info">
-                                                    <strong>Matched Skills:</strong>
-                                                    {{ implode(', ', $rec['matched_skills'] ?? []) }}
-                                                </small>
-                                                <p class="mb-1 text-muted">{{ $rec['link']  ?? ''}}</p>
+                                                @if(isset($rec['company_name']))
+                                                    <p class="mb-1 text-muted">{{ $rec['company_name'] }}</p>
+                                                @endif
+                                                @if(!empty($rec['matched_skills']))
+                                                    <div class="mt-2 text-info small">
+                                                        <i class='bx bx-check-double'></i>
+                                                        <strong>Matched Skills:</strong>
+                                                        {{ is_array($rec['matched_skills']) ? implode(', ', $rec['matched_skills']) : $rec['matched_skills'] }}
+                                                    </div>
+                                                @endif
+                                                @if(isset($rec['link']))
+                                                    <a href="{{ $rec['link'] }}" target="_blank" class="btn btn-sm btn-outline-info mt-2" style="font-size: 0.75rem;">View Job Details</a>
+                                                @endif
                                             </div>
                                         @endforeach
                                     </div>
@@ -234,8 +241,8 @@
                     <script>
                         document.addEventListener("DOMContentLoaded", function() {
                             const ctx = document.getElementById('jobMatchChart').getContext('2d');
-                            const jobTitles = @json(collect($job_recommendations)->pluck('title'));
-                            const jobScores = @json(collect($job_recommendations)->pluck('final_score'));
+                            const jobTitles = @json(collect($job_recommendations['top_jobs'] ?? [])->pluck('job'));
+                            const jobScores = @json(collect($job_recommendations['top_jobs'] ?? [])->pluck('match_percentage'));
 
                             new Chart(ctx, {
                                 type: 'pie',
