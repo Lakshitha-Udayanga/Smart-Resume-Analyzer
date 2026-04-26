@@ -64,14 +64,18 @@ class ResumeController extends Controller
 
             $parsed_data = $this->resumeTransactionUtil->newStoreDataSummarizeData($aiResult, $resume);
 
-            // $job_recommendations = $this->resumeTransactionUtil->findBestMatch($aiResult, $this->endpoint, $parsedData->id);
-            $job_recommendations = $this->resumeTransactionUtil->getRecommendationsJobs($user_id, $resume, $parsed_data);
+            $job_recommendation_title = $this->resumeTransactionUtil->getRecommendationsJobs($user_id, $resume, $parsed_data);
+
+            $jobs_list = $this->resumeTransactionUtil->getJobsList($job_recommendation_title);
+
+            $data_set_array = $this->resumeTransactionUtil->prepareDataSet($parsed_data, $jobs_list);
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Resume uploaded and analyzed successfully',
                 'parsed_data' => $aiResult,
-                'job_recommendations' => $job_recommendations
+                'job_recommendations' => $job_recommendation_title,
+                'jobs_list' => $jobs_list
             ], 201);
         } catch (\Illuminate\Http\Client\RequestException $e) {
             return response()->json([
@@ -117,13 +121,13 @@ class ResumeController extends Controller
                 return $this->resumeTransactionUtil->newStoreDataSummarizeData($ai_result, $resume);
             });
 
-            //get recomment job using gemini
-            // $job_recommendations = $this->resumeTransactionUtil->findBestMatch($ai_result, $this->endpoint, $parsed_data->id);
-            // $job_recommendations = [];
-
             $job_recommendations = $this->resumeTransactionUtil->getRecommendationsJobs($user_id, $resume, $parsed_data);
 
-            return view('test_pdf.pdf_upload', compact('ai_result', 'job_recommendations'));
+            $jobs_list = $this->resumeTransactionUtil->getJobsList($job_recommendations);
+
+            // $data_set_array = $this->resumeTransactionUtil->prepareDataSet($parsed_data, $jobs_list);
+
+            return view('test_pdf.pdf_upload', compact('ai_result', 'job_recommendations', 'jobs_list'));
         } catch (Exception $e) {
             \Log::error('Summarize PDF Error: ' . $e->getMessage());
             return back()->with('error', 'Failed to process resume: ' . $e->getMessage());

@@ -13,4 +13,9 @@ class Resume extends Model
     {
          return $this->hasOne(ParsedData::class, 'resume_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

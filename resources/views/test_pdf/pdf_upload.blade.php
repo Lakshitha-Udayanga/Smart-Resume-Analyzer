@@ -37,6 +37,9 @@
                 <label for="pdf" class="form-label">Select PDF</label>
                 <input type="file" name="pdf" id="pdf" class="form-control" accept="application/pdf"
                     required>
+                <div id="file-name-display" class="mt-2 text-muted fw-bold" style="display: none;">
+                    <i class='bx bx-file'></i> Selected File: <span id="file-name-text"></span>
+                </div>
             </div>
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Upload & Summarize</button>
@@ -185,105 +188,106 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                @if (isset($job_recommendations['top_jobs']) && count($job_recommendations['top_jobs']) > 0)
+                @if (isset($job_recommendations['best_match']))
                     <div class="row mb-5">
                         <div class="col-md-6">
                             <div class="card shadow mb-4">
                                 <div class="card-header bg-dark text-white">
-                                    Job Matching Analysis
+                                    Recommended Job Title
                                 </div>
                                 <div class="card-body">
-                                    <div style="max-width: 400px; margin: auto;">
-                                        <canvas id="jobMatchChart"></canvas>
-                                    </div>
+                                    @php
+                                        $rec = $job_recommendations['best_match'] ?? null;
+                                    @endphp
+
+                                    @if ($rec)
+                                        <div
+                                            class="d-flex justify-content-between align-items-center p-3 border rounded bg-light">
+                                            <div>
+                                                <h5 class="mb-0 text-primary fw-bold text-uppercase">
+                                                    {{ $rec['job_title'] ?? 'N/A' }}
+                                                </h5>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-success rounded-pill px-4 py-2 fs-6">
+                                                    {{ number_format($rec['match_percentage'] ?? 0, 2) }}% Match
+                                                </span>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <p class="text-muted text-center">No recommendation available.</p>
+                                    @endif
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-md-6">
                             <div class="card shadow mb-4">
-                                <div class="card-header bg-dark text-white">
-                                    Top Job Recommendations
+                                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Matching Job Openings</h5>
+                                    @if(isset($jobs_list))
+                                        <span class="badge bg-primary">{{ count($jobs_list) }} Found</span>
+                                    @endif
                                 </div>
-                                <div class="card-body">
-                                    <div class="list-group list-group-flush">
-                                        @foreach ($job_recommendations['top_jobs'] as $rec)
-                                            <div class="list-group-item">
-                                                <div class="d-flex w-100 justify-content-between align-items-center">
-                                                    <h6 class="mb-1 text-primary fw-bold">{{ $rec['job'] }}</h6>
-                                                    <span class="badge bg-success rounded-pill px-3 py-2">
-                                                        {{ number_format($rec['match_percentage'], 2) }}% Match
-                                                    </span>
-                                                </div>
-                                                @if(isset($rec['company_name']))
-                                                    <p class="mb-1 text-muted">{{ $rec['company_name'] }}</p>
-                                                @endif
-                                                @if(!empty($rec['matched_skills']))
-                                                    <div class="mt-2 text-info small">
-                                                        <i class='bx bx-check-double'></i>
-                                                        <strong>Matched Skills:</strong>
-                                                        {{ is_array($rec['matched_skills']) ? implode(', ', $rec['matched_skills']) : $rec['matched_skills'] }}
+                                <div class="card-body p-0">
+                                    @if (isset($jobs_list) && count($jobs_list) > 0)
+                                        <div class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+                                            @foreach ($jobs_list as $job)
+                                                <div class="list-group-item list-group-item-action">
+                                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                                        <div>
+                                                            <h6 class="mb-1 fw-bold d-inline">{{ $job->title }}</h6>
+                                                            <span class="text-muted small ms-2">- {{ $job->experience_level }}</span>
+                                                        </div>
+                                                        <small class="text-muted">{{ $job->location }}</small>
                                                     </div>
-                                                @endif
-                                                @if(isset($rec['link']))
-                                                    <a href="{{ $rec['link'] }}" target="_blank" class="btn btn-sm btn-outline-info mt-2" style="font-size: 0.75rem;">View Job Details</a>
-                                                @endif
-                                            </div>
-                                        @endforeach
-                                    </div>
+                                                    <p class="mb-1 text-muted small">{{ $job->company_name }}</p>
+                                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                                        <div>
+                                                            <span class="badge bg-info text-dark small">{{ $job->job_type }}</span>
+                                                            @if($job->salary_min)
+                                                                <span class="text-success small ms-2">
+                                                                    LKR {{ number_format($job->salary_min) }} - {{ number_format($job->salary_max) }}
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                        @if ($job->link)
+                                                            <a href="{{ $job->link }}" target="_blank"
+                                                                class="btn btn-sm btn-outline-primary">
+                                                                View Details
+                                                            </a>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <div class="p-4 text-center">
+                                            <p class="text-muted mb-0">No active job openings found matching this title in our database.</p>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function() {
-                            const ctx = document.getElementById('jobMatchChart').getContext('2d');
-                            const jobTitles = @json(collect($job_recommendations['top_jobs'] ?? [])->pluck('job'));
-                            const jobScores = @json(collect($job_recommendations['top_jobs'] ?? [])->pluck('match_percentage'));
-
-                            new Chart(ctx, {
-                                type: 'pie',
-                                data: {
-                                    labels: jobTitles,
-                                    datasets: [{
-                                        data: jobScores,
-                                        backgroundColor: [
-                                            'rgba(255, 99, 132, 0.7)',
-                                            'rgba(54, 162, 235, 0.7)',
-                                            'rgba(255, 206, 86, 0.7)',
-                                            'rgba(75, 192, 192, 0.7)',
-                                            'rgba(153, 102, 255, 0.7)',
-                                            'rgba(255, 159, 64, 0.7)'
-                                        ],
-                                        borderWidth: 1
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    plugins: {
-                                        legend: {
-                                            position: 'bottom',
-                                        },
-                                        tooltip: {
-                                            callbacks: {
-                                                label: function(context) {
-                                                    return context.label + ': ' + context.raw + '% Match';
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-                        });
-                    </script>
                 @endif
-
             </div>
         @endif
     </div>
+
+    <script>
+        document.getElementById('pdf').addEventListener('change', function() {
+            const fileNameDisplay = document.getElementById('file-name-display');
+            const fileNameText = document.getElementById('file-name-text');
+            
+            if (this.files && this.files.length > 0) {
+                fileNameText.textContent = this.files[0].name;
+                fileNameDisplay.style.display = 'block';
+            } else {
+                fileNameDisplay.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 
 </html>

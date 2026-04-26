@@ -18,41 +18,6 @@ use Smalot\PdfParser\Parser as PdfParser;
 
 class ResumeTransactionUtil
 {
-    public function callAISummarizePdf($file)
-    {
-        $response = Http::timeout(120)
-            ->attach(
-                'file',
-                file_get_contents($file),
-                $file->getClientOriginalName()
-            )
-            ->post('http://204.236.202.130:5000/analyze');
-
-        if ($response->successful()) {
-            $result = $response->json();
-
-            $relevantLabels = [
-                'technical_skills' => $result['technical_skills'] ?? [],
-                'soft_skills' => $result['soft_skills'] ?? [],
-                'strengths' => $result['strengths'] ?? [],
-                'weaknesses' => $result['weaknesses'] ?? [],
-                'summary' => $result['summary'] ?? '',
-                'certificates' => $result['certificates'] ?? [],
-            ];
-
-            return $relevantLabels;
-        }
-
-        return [
-            'technical_skills' => [],
-            'soft_skills' => [],
-            'strengths' => [],
-            'weaknesses' => [],
-            'summary' => '',
-            'certificates' => [],
-        ];
-    }
-
     public function newStoreDataSummarizeData($aiResult, $resume)
     {
         if (!$aiResult || !is_array($aiResult)) {
@@ -224,7 +189,7 @@ class ResumeTransactionUtil
         ]);
 
         // ml model data
-        $response = Http::post('http://34.207.207.47:5000/recommend', [
+        $response = Http::post('http://3.80.103.73:5000/predict', [
             'skills' =>
             $parsed_data->technical_skills->pluck('description')->implode(', ') . ', ' .
                 $parsed_data->soft_skills->pluck('description')->implode(', ') . ', ' .
@@ -236,26 +201,17 @@ class ResumeTransactionUtil
         if ($response->failed()) {
             return [];
         }
-
-        // if (is_array($response->json())) {
-        //     foreach ($response->json() as $rec) {
-        //         JobRecommendation::updateOrCreate(
-        //             [
-        //                 'parsed_data_id' => $parsed_data->id,
-        //                 'job_id' => $rec['id'] ?? null,
-        //             ],
-        //             [
-        //                 'job_title' => $rec['title'] ?? '',
-        //                 'company_name' => $rec['company_name'] ?? '',
-        //                 'match_score' => $rec['final_score'] ?? 0,
-        //                 'matched_skills' => isset($rec['matched_skills']) ? json_encode($rec['matched_skills']) : null,
-        //                 'link' => isset($rec['link']) ? $rec['link'] : null,
-        //             ]
-        //         );
-        //     }
-        // }
-
         return $response->json();
+    }
+
+    public function getJobsList($job_recommendations)
+    {
+        $title = $job_recommendations['best_match']['job_title'] ?? null;
+        if (!$title) {
+            return collect([]);
+        }
+
+        return Job::where('title', 'LIKE', "%{$title}%")->limit(10)->get();
     }
 
     public function getProfileData($user_id)
@@ -312,6 +268,35 @@ class ResumeTransactionUtil
             'status' => 'success',
             'data' => $allCvData
         ]);
+    }
+
+
+    public function prepareDataSet($parsed_data, $jobs_list)
+    {
+        $cv_data = [
+            'experiences'      => $parsed_data->experiences->pluck('description')->toArray(),
+            'certificates'     => $parsed_data->certificates->pluck('description')->toArray(),
+            'soft_skills'      => $parsed_data->soft_skills->pluck('description')->toArray(),
+            'technical_skills' => $parsed_data->technical_skills->pluck('description')->toArray(),
+            'strengths'        => $parsed_data->strengths->pluck('description')->toArray(),
+        ];
+
+        $jobs_data = $jobs_list->map(function ($job) {
+            return [
+                'title' => $job->title,
+                'company_name' => $job->company_name,
+                'location' => $job->location,
+                'experience_level' => $job->experience_level,
+                'skills' => $job->skills,
+                'education_certificate' => $job->education_certificate,
+                'link' => $job->link,
+            ];
+        })->toArray();
+
+        return [
+            'cv_data'   => json_encode($cv_data),
+            'jobs_data' => json_encode($jobs_data),
+        ];
     }
 
     //ollam server request
