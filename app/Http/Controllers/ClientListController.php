@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Exports\ClientResumeExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Utils\ResumeTransactionUtil;
 
 class ClientListController extends Controller
 {
@@ -74,12 +75,9 @@ class ClientListController extends Controller
 
         foreach ($user->cv_lists as $resume) {
             if ($resume->parsedData) {
+                $util = new ResumeTransactionUtil();
                 foreach ($resume->parsedData->job_recommendations as $recommendation) {
-                    $recommendation->matched_jobs = \App\Models\Job::where('title', 'LIKE', "%{$recommendation->job_title}%")
-                        ->orderBy('salary_max', 'desc')
-                        ->orderBy('salary_min', 'desc')
-                        ->limit(10)
-                        ->get();
+                    $recommendation->matched_jobs = $util->fetchJobsByLevel($recommendation->job_title);
                 }
             }
         }

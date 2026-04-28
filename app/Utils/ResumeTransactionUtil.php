@@ -132,14 +132,10 @@ class ResumeTransactionUtil
                     JobRecommendation::updateOrCreate(
                         [
                             'parsed_data_id' => $parsed_data_id,
-                            'job_id' => $rec['job_id'] ?? null,
+                            'job_title' => $rec['job_title'] ?? ($rec['title'] ?? ''),
                         ],
                         [
-                            'job_title' => $rec['job_title'] ?? '',
-                            'company_name' => $rec['company_name'] ?? '',
-                            'match_score' => (int) str_replace('%', '', $rec['final_score'] ?? '0'),
-                            'matched_skills' => isset($rec['matched_skills']) ? json_encode($rec['matched_skills']) : null,
-                            'link' => $rec['link'] ?? null,
+                            'match_percentage' => (float) ($rec['final_score'] ?? ($rec['score'] ?? ($rec['match_percentage'] ?? 0))),
                         ]
                     );
                 }
@@ -210,16 +206,16 @@ class ResumeTransactionUtil
 
     public function getJobsList($job_recommendations)
     {
-        $title = $job_recommendations['best_match']['job_title'] ?? null;
-        if (!$title) {
-            return collect([]);
+        $title = null;
+        if (isset($job_recommendations['best_match']['job_title'])) {
+            $title = $job_recommendations['best_match']['job_title'];
+        } elseif (isset($job_recommendations[0]['job_title'])) {
+            $title = $job_recommendations[0]['job_title'];
+        } elseif (isset($job_recommendations[0]['title'])) {
+            $title = $job_recommendations[0]['title'];
         }
 
-        return Job::where('title', 'LIKE', "%{$title}%")
-            ->orderBy('salary_max', 'desc')
-            ->orderBy('salary_min', 'desc')
-            ->limit(10)
-            ->get();
+        return $this->fetchJobsByLevel($title);
     }
 
     public function getProfileData($user_id)
@@ -260,11 +256,7 @@ class ResumeTransactionUtil
                     return [
                         'job_title' => $item->job_title,
                         'match_percentage' => $item->match_percentage,
-                        'matched_jobs' => Job::where('title', 'LIKE', "%{$item->job_title}%")
-                            ->orderBy('salary_max', 'desc')
-                            ->orderBy('salary_min', 'desc')
-                            ->limit(10)
-                            ->get()
+                        'matched_jobs' => $this->fetchJobsByLevel($item->job_title)
                     ];
                 }),
             ];
@@ -344,7 +336,12 @@ class ResumeTransactionUtil
 
         if (empty($jobData) && is_array($response)) {
             foreach ($response as $item) {
-                if (is_string($item)) {
+                if (is_array($item)) {
+                    $jobData[] = [
+                        'title' => $item['job_title'] ?? ($item['title'] ?? null),
+                        'percentage' => $item['final_score'] ?? ($item['score'] ?? ($item['match_percentage'] ?? null))
+                    ];
+                } elseif (is_string($item)) {
                     $jobData[] = ['title' => $item, 'percentage' => null];
                 }
             }
@@ -364,61 +361,91 @@ class ResumeTransactionUtil
             }
         }
     }
-    public function getClientProfile($user_id)
+
+    // public function getClientProfile($user_id)
+    // {
+    //     $user = User::with([
+    //         'cv_lists' => function ($query) {
+    //             $query->latest()->limit(1);
+    //         },
+    //         'cv_lists.parsedData' => function ($query) {
+    //             $query->with([
+    //                 'strengths',
+    //                 'weaknesses',
+    //                 'technical_skills',
+    //                 'soft_skills',
+    //                 'certificates',
+    //                 'experiences',
+    //                 'job_recommendations.jobs'
+    //             ]);
+    //         }
+    //     ])->findOrFail($user_id);
+
+    //     $resume = $user->cv_lists->first();
+
+    //     if (!$resume || !$resume->parsedData) {
+    //         return [
+    //             'status' => 'error',
+    //             'message' => 'No resume data found'
+    //         ];
+    //     }
+
+    //     $parsedData = $resume->parsedData;
+
+    //     return [
+    //         'user' => [
+    //             'name' => $user->name,
+    //             'email' => $user->email,
+    //         ],
+    //         'resume_details' => [
+    //             'cv_url' => asset($resume->file_path),
+    //             'summary' => $parsedData->summary_text,
+    //             'strengths' => $parsedData->strengths->pluck('description'),
+    //             'weaknesses' => $parsedData->weaknesses->pluck('description'),
+    //             'technical_skills' => $parsedData->technical_skills->pluck('description'),
+    //             'soft_skills' => $parsedData->soft_skills->pluck('description'),
+    //             'certificates' => $parsedData->certificates->pluck('description'),
+    //             'experiences' => $parsedData->experiences->pluck('description'),
+    //         ],
+    //         'recommendations' => $parsedData->job_recommendations->map(function ($item) {
+    //             return [
+    //                 'recommended_title' => $item->job_title,
+    //                 'top_jobs' => $this->fetchJobsByLevel($item->job_title)
+    //             ];
+    //         })
+    //     ];
+    // }
+
+    public function fetchJobsByLevel($title)
     {
-        $user = User::with([
-            'cv_lists' => function ($query) {
-                $query->latest()->limit(1);
-            },
-            'cv_lists.parsedData' => function ($query) {
-                $query->with([
-                    'strengths',
-                    'weaknesses',
-                    'technical_skills',
-                    'soft_skills',
-                    'certificates',
-                    'experiences',
-                    'job_recommendations.jobs'
-                ]);
-            }
-        ])->findOrFail($user_id);
-
-        $resume = $user->cv_lists->first();
-
-        if (!$resume || !$resume->parsedData) {
-            return [
-                'status' => 'error',
-                'message' => 'No resume data found'
-            ];
+        if (!$title) {
+            return collect([]);
         }
 
-        $parsedData = $resume->parsedData;
-
-        return [
-            'user' => [
-                'name' => $user->name,
-                'email' => $user->email,
-            ],
-            'resume_details' => [
-                'cv_url' => asset($resume->file_path),
-                'summary' => $parsedData->summary_text,
-                'strengths' => $parsedData->strengths->pluck('description'),
-                'weaknesses' => $parsedData->weaknesses->pluck('description'),
-                'technical_skills' => $parsedData->technical_skills->pluck('description'),
-                'soft_skills' => $parsedData->soft_skills->pluck('description'),
-                'certificates' => $parsedData->certificates->pluck('description'),
-                'experiences' => $parsedData->experiences->pluck('description'),
-            ],
-            'recommendations' => $parsedData->job_recommendations->map(function ($item) {
-                return [
-                    'recommended_title' => $item->job_title,
-                    'top_jobs' => Job::where('title', 'LIKE', "%{$item->job_title}%")
-                        ->orderBy('salary_max', 'desc')
-                        ->orderBy('salary_min', 'desc')
-                        ->limit(10)
-                        ->get()
-                ];
-            })
+        $levels = [
+            'intern' => ['Intern', 'Trainee'],
+            'junior' => ['Junior', 'Associate', 'Entry Level'],
+            'mid'    => ['Mid', 'Mid Level', 'Intermediate'],
+            'senior' => ['Senior', 'Sr.'],
+            'lead'   => ['Lead', 'Manager', 'Architect', 'Principal', 'Head'],
         ];
+
+        $allJobs = collect();
+
+        foreach ($levels as $key => $values) {
+            $jobs = Job::where('title', 'LIKE', "%{$title}%")
+                ->where(function ($query) use ($values) {
+                    foreach ($values as $value) {
+                        $query->orWhere('experience_level', 'LIKE', "%{$value}%");
+                    }
+                })
+                ->orderBy('salary_min', 'desc')
+                ->limit(3)
+                ->get();
+
+            $allJobs = $allJobs->merge($jobs);
+        }
+
+        return $allJobs->sortByDesc('salary_min')->values();
     }
 }

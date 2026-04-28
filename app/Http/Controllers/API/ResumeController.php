@@ -82,10 +82,12 @@ class ResumeController extends Controller
             ], 500);
         }
     }
+
     public function viewIndexPdf()
     {
         return view('test_pdf.pdf_upload');
     }
+
     public function summarizePdf(Request $request)
     {
         try {
@@ -127,6 +129,7 @@ class ResumeController extends Controller
             return back()->with('error', 'Failed to process resume: ' . $e->getMessage());
         }
     }
+
     public function askGemini($text)
     {
         $base64Text = base64_encode($text);
@@ -149,14 +152,14 @@ class ResumeController extends Controller
             ->withHeaders([
                 'Content-Type' => 'application/json',
             ])->post($this->endpoint, [
-                    'contents' => [
-                        [
-                            'parts' => [
-                                ['text' => $prompt]
-                            ]
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt]
                         ]
                     ]
-                ]);
+                ]
+            ]);
 
         if ($response->failed()) {
             throw new Exception('Gemini Error: ' . $response->json('error.message'));
@@ -169,7 +172,7 @@ class ResumeController extends Controller
     public function getProfileData($user_id)
     {
         try {
-            //get profile data
+
             return $this->resumeTransactionUtil->getProfileData($user_id);
         } catch (Exception $e) {
             return response()->json([
