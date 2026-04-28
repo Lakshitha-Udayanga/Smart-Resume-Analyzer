@@ -110,6 +110,102 @@
     <!-- Bootstrap JS -->
     @include('layouts.javascript')
 
+    <script>
+        $(document).ready(function() {
+            // Check for saved theme preference
+            const currentTheme = localStorage.getItem('theme');
+            if (currentTheme) {
+                $('html').attr('class', currentTheme);
+                if (currentTheme === 'dark-theme') {
+                    $('#darkmode').prop('checked', true);
+                } else if (currentTheme === 'semi-dark') {
+                    $('#semidark').prop('checked', true);
+                } else if (currentTheme === 'minimal-theme') {
+                    $('#minimaltheme').prop('checked', true);
+                } else {
+                    $('#lightmode').prop('checked', true);
+                }
+            }
+
+            // Dark mode icon toggle
+            $('.dark-mode-icon').on('click', function() {
+                if ($('html').hasClass('dark-theme')) {
+                    $('html').attr('class', 'light-theme');
+                    localStorage.setItem('theme', 'light-theme');
+                    $('#lightmode').prop('checked', true);
+                } else {
+                    $('html').attr('class', 'dark-theme');
+                    localStorage.setItem('theme', 'dark-theme');
+                    $('#darkmode').prop('checked', true);
+                }
+            });
+
+            // Theme customizer radio buttons
+            $('#lightmode').on('click', function() {
+                $('html').attr('class', 'light-theme');
+                localStorage.setItem('theme', 'light-theme');
+            });
+
+            $('#darkmode').on('click', function() {
+                $('html').attr('class', 'dark-theme');
+                localStorage.setItem('theme', 'dark-theme');
+            });
+
+            $('#semidark').on('click', function() {
+                $('html').attr('class', 'semi-dark');
+                localStorage.setItem('theme', 'semi-dark');
+            });
+
+            $('#minimaltheme').on('click', function() {
+                $('html').attr('class', 'minimal-theme');
+                localStorage.setItem('theme', 'minimal-theme');
+            });
+
+            // Switcher toggle
+            $('.switcher-btn').on('click', function() {
+                $('.switcher-wrapper').toggleClass('switcher-toggled');
+            });
+
+            $('.close-switcher').on('click', function() {
+                $('.switcher-wrapper').removeClass('switcher-toggled');
+            });
+
+            // Header colors
+            $('#headercolor1').on('click', function() {
+                $('html').addClass('color-header headercolor1');
+                $('html').removeClass('headercolor2 headercolor3 headercolor4 headercolor5 headercolor6 headercolor7 headercolor8');
+            });
+            $('#headercolor2').on('click', function() {
+                $('html').addClass('color-header headercolor2');
+                $('html').removeClass('headercolor1 headercolor3 headercolor4 headercolor5 headercolor6 headercolor7 headercolor8');
+            });
+            $('#headercolor3').on('click', function() {
+                $('html').addClass('color-header headercolor3');
+                $('html').removeClass('headercolor1 headercolor2 headercolor4 headercolor5 headercolor6 headercolor7 headercolor8');
+            });
+            $('#headercolor4').on('click', function() {
+                $('html').addClass('color-header headercolor4');
+                $('html').removeClass('headercolor1 headercolor2 headercolor3 headercolor5 headercolor6 headercolor7 headercolor8');
+            });
+            $('#headercolor5').on('click', function() {
+                $('html').addClass('color-header headercolor5');
+                $('html').removeClass('headercolor1 headercolor2 headercolor3 headercolor4 headercolor6 headercolor7 headercolor8');
+            });
+            $('#headercolor6').on('click', function() {
+                $('html').addClass('color-header headercolor6');
+                $('html').removeClass('headercolor1 headercolor2 headercolor3 headercolor4 headercolor5 headercolor7 headercolor8');
+            });
+            $('#headercolor7').on('click', function() {
+                $('html').addClass('color-header headercolor7');
+                $('html').removeClass('headercolor1 headercolor2 headercolor3 headercolor4 headercolor5 headercolor6 headercolor8');
+            });
+            $('#headercolor8').on('click', function() {
+                $('html').addClass('color-header headercolor8');
+                $('html').removeClass('headercolor1 headercolor2 headercolor3 headercolor4 headercolor5 headercolor6 headercolor7');
+            });
+        });
+    </script>
+
     @yield('script')
 </body>
 

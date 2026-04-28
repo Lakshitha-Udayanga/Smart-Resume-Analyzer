@@ -42,31 +42,39 @@
 
                             <li class="nav-item dropdown dropdown-large">
                                 <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative"
-                                    href="#" data-bs-toggle="dropdown"><span class="alert-count">7</span>
+                                    href="#" data-bs-toggle="dropdown">
+                                    @if($unreadCount > 0)
+                                        <span class="alert-count">{{ $unreadCount }}</span>
+                                    @endif
                                     <i class='bx bx-bell'></i>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end">
                                     <a href="javascript:;">
                                         <div class="msg-header">
                                             <p class="msg-header-title">Notifications</p>
-                                            <p class="msg-header-badge">8 New</p>
+                                            <p class="msg-header-badge">{{ $unreadCount }} New</p>
                                         </div>
                                     </a>
                                     <div class="header-notifications-list">
-                                        <a class="dropdown-item" href="javascript:;">
-                                            <div class="d-flex align-items-center">
-                                                <div class="user-online">
-                                                    <img src="{{ asset('assets/images/avatar.png') }}" class="msg-avatar"
-                                                        alt="user avatar">
+                                        @forelse($unreadNotifications as $notification)
+                                            <a class="dropdown-item notification-item" href="javascript:;" 
+                                               onclick="markAsRead('{{ $notification->id }}', this)">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="notify bg-light-primary text-primary">
+                                                        <i class='bx {{ $notification->type == "client" ? "bx-user" : "bx-briefcase" }}'></i>
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="msg-name">{{ $notification->title }}<span
+                                                                class="msg-time float-end">{{ $notification->created_at->diffForHumans() }}</span></h6>
+                                                        <p class="msg-info">{{ $notification->message }}</p>
+                                                    </div>
                                                 </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="msg-name">Daisy Anderson<span
-                                                            class="msg-time float-end">5 sec
-                                                            ago</span></h6>
-                                                    <p class="msg-info">The standard chunk of lorem</p>
-                                                </div>
+                                            </a>
+                                        @empty
+                                            <div class="text-center p-3">
+                                                <p class="mb-0">No new notifications</p>
                                             </div>
-                                        </a>
+                                        @endforelse
                                     </div>
                                     <a href="javascript:;">
                                         <div class="text-center msg-footer">
@@ -75,6 +83,40 @@
                                     </a>
                                 </div>
                             </li>
+
+                            <script>
+                                function markAsRead(id, element) {
+                                    fetch(`/notifications/mark-as-read/${id}`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            'Content-Type': 'application/json',
+                                            'Accept': 'application/json'
+                                        }
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.status === 'success') {
+                                            // Remove the item from list
+                                            element.remove();
+                                            
+                                            // Update counts
+                                            let countElements = document.querySelectorAll('.alert-count, .msg-header-badge');
+                                            countElements.forEach(el => {
+                                                let currentCount = parseInt(el.innerText);
+                                                if (!isNaN(currentCount) && currentCount > 0) {
+                                                    let newCount = currentCount - 1;
+                                                    el.innerText = newCount > 0 ? (el.classList.contains('msg-header-badge') ? newCount + ' New' : newCount) : '';
+                                                    if (newCount === 0 && el.classList.contains('alert-count')) {
+                                                        el.style.display = 'none';
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    })
+                                    .catch(error => console.error('Error:', error));
+                                }
+                            </script>
                             <li class="nav-item dropdown dropdown-large" hidden>
                                 <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative"
                                     href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -104,7 +146,7 @@
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item d-flex align-items-center" href="javascript:;"><i
+                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('client.show', auth()->id()) }}"><i
                                         class="bx bx-user fs-5"></i><span>Profile</span></a>
                             </li>
                             <li>

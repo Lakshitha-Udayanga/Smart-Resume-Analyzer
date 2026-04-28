@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JobsListController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\TrainingController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,4 +48,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/data-training/process', [TrainingController::class, 'process'])->name('training.process');
     Route::get('/data-training/export', [TrainingController::class, 'export'])->name('training.export');
     Route::post('/data-training/import', [TrainingController::class, 'import'])->name('training.import');
+    Route::get('/notifications/latest', [NotificationController::class, 'getLatestNotifications'])->name('notifications.latest');
+    Route::post('/notifications/mark-as-read/{id}', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
 });

@@ -19,5 +19,13 @@ class AppServiceProvider extends ServiceProvider
         // $this->registerPolicies();
 
         // Passport::routes();
+
+        view()->composer('layouts.header', function ($view) {
+            $notifications = \App\Models\Notification::where('is_read', false)->latest()->limit(10)->get();
+            $view->with([
+                'unreadNotifications' => $notifications,
+                'unreadCount' => $notifications->count(),
+            ]);
+        });
     }
 }
