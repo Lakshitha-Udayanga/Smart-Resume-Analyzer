@@ -58,7 +58,7 @@
                         </ul>
                     </li>
 
-                    <li class="nav-item">
+                    <li class="nav-item" hidden>
                         <a class="nav-link" href="{{ route('training.index') }}">
                             <div class="parent-icon"><i class='bx bx-brain'></i></div>
                             <div class="menu-title d-flex align-items-center">Data training</div>
