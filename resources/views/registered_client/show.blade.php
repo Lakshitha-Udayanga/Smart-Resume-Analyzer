@@ -157,15 +157,57 @@
 
                                 <div class="card smart-card mb-4">
                                     <div class="card-header smart-card-header bg-light">
-                                        <h6 class="mb-0 text-primary fw-semibold"><i class="bx bx-briefcase-alt-2 me-1"></i> Compatible Job Roles</h6>
+                                        <h6 class="mb-0 text-primary fw-semibold"><i class="bx bx-briefcase-alt-2 me-1"></i> Compatible Job Roles & Matches</h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
-                                            @forelse($resume->parsedData->job_recommendations as $job)
-                                                <div class="col-md-6 mb-3">
+                                            @forelse($resume->parsedData->job_recommendations as $recommendation)
+                                                <div class="col-12 mb-4">
                                                     <div class="p-3 bg-light rounded border-start border-3 border-primary h-100">
-                                                        <h6 class="mb-1 text-primary">{{ $job->job_title }}</h6>
-                                                        <p class="small text-muted mb-0">{{ Str::limit($job->job_description, 100) }}</p>
+                                                        <h6 class="mb-3 text-primary fw-bold">{{ $recommendation->job_title }}</h6>
+                                                        
+                                                        <div class="table-responsive">
+                                                            <table class="table table-sm table-hover mb-0">
+                                                                <thead class="table-light">
+                                                                    <tr>
+                                                                        <th>Matching Job Title</th>
+                                                                        <th>Company</th>
+                                                                        <th>Location</th>
+                                                                        <th>Salary</th>
+                                                                        <th class="text-center">Link</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    @forelse($recommendation->matched_jobs as $matchedJob)
+                                                                        <tr>
+                                                                            <td class="small">{{ $matchedJob->title }}</td>
+                                                                            <td class="small">{{ $matchedJob->company_name }}</td>
+                                                                            <td class="small text-muted">{{ $matchedJob->location }}</td>
+                                                                            <td class="small text-success fw-semibold">
+                                                                                @if($matchedJob->salary_min || $matchedJob->salary_max)
+                                                                                    LKR {{ number_format($matchedJob->salary_min) }} - {{ number_format($matchedJob->salary_max) }}
+                                                                                @else
+                                                                                    <span class="text-muted">N/A</span>
+                                                                                @endif
+                                                                            </td>
+                                                                            <td class="text-center">
+                                                                                @if($matchedJob->link)
+                                                                                    <a href="{{ $matchedJob->link }}" target="_blank" class="text-primary" title="View Job">
+                                                                                        <i class="bx bx-link-external fs-5"></i>
+                                                                                    </a>
+                                                                                @else
+                                                                                    -
+                                                                                @endif
+                                                                            </td>
+                                                                        </tr>
+                                                                    @empty
+                                                                        <tr>
+                                                                            <td colspan="5" class="text-center text-muted py-3">No specific matches found in database for this role</td>
+                                                                        </tr>
+                                                                    @endforelse
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             @empty

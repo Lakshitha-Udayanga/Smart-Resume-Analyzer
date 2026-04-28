@@ -70,8 +70,19 @@ class ClientListController extends Controller
             'cv_lists.parsedData.technical_skills',
             'cv_lists.parsedData.soft_skills',
             'cv_lists.parsedData.certificates',
-            'cv_lists.parsedData.job_recommendations'
         ])->findOrFail($id);
+
+        foreach ($user->cv_lists as $resume) {
+            if ($resume->parsedData) {
+                foreach ($resume->parsedData->job_recommendations as $recommendation) {
+                    $recommendation->matched_jobs = \App\Models\Job::where('title', 'LIKE', "%{$recommendation->job_title}%")
+                        ->orderBy('salary_max', 'desc')
+                        ->orderBy('salary_min', 'desc')
+                        ->limit(10)
+                        ->get();
+                }
+            }
+        }
 
         return view('registered_client.show', compact('user'));
     }

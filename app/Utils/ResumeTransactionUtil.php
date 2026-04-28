@@ -31,12 +31,12 @@ class ResumeTransactionUtil
         ]);
 
         $dataMap = [
-            'strengths'        => Strength::class,
-            'weaknesses'       => Weakness::class,
+            'strengths' => Strength::class,
+            'weaknesses' => Weakness::class,
             'technical_skills' => Skill::class,
-            'certifications'   => Certificate::class,
-            'experiences'      => Experience::class,
-            'soft_skills'      => SoftSkill::class,
+            'certifications' => Certificate::class,
+            'experiences' => Experience::class,
+            'soft_skills' => SoftSkill::class,
         ];
 
         foreach ($dataMap as $key => $modelClass) {
@@ -47,9 +47,9 @@ class ResumeTransactionUtil
                     if (!empty($value)) {
                         $records[] = [
                             'parsed_data_id' => $parsedData->id,
-                            'description'    => is_array($value) ? json_encode($value) : $value,
-                            'created_at'     => now(),
-                            'updated_at'     => now(),
+                            'description' => is_array($value) ? json_encode($value) : $value,
+                            'created_at' => now(),
+                            'updated_at' => now(),
                         ];
                     }
                 }
@@ -111,17 +111,17 @@ class ResumeTransactionUtil
         $response = Http::timeout(120)->withHeaders([
             'Content-Type' => 'application/json',
         ])->post($endpoint, [
-            'contents' => [
-                [
-                    'parts' => [
-                        ['text' => $prompt]
+                    'contents' => [
+                        [
+                            'parts' => [
+                                ['text' => $prompt]
+                            ]
+                        ]
+                    ],
+                    'generationConfig' => [
+                        'responseMimeType' => 'application/json'
                     ]
-                ]
-            ],
-            'generationConfig' => [
-                'responseMimeType' => 'application/json'
-            ]
-        ]);
+                ]);
 
         if ($response->successful()) {
             $responseText = $response->json()['candidates'][0]['content']['parts'][0]['text'];
@@ -137,7 +137,7 @@ class ResumeTransactionUtil
                         [
                             'job_title' => $rec['job_title'] ?? '',
                             'company_name' => $rec['company_name'] ?? '',
-                            'match_score' => (int)str_replace('%', '', $rec['final_score'] ?? '0'),
+                            'match_score' => (int) str_replace('%', '', $rec['final_score'] ?? '0'),
                             'matched_skills' => isset($rec['matched_skills']) ? json_encode($rec['matched_skills']) : null,
                             'link' => $rec['link'] ?? null,
                         ]
@@ -191,12 +191,16 @@ class ResumeTransactionUtil
         // ml model data
         $response = Http::post('http://3.80.103.73:5000/predict', [
             'skills' =>
-            $parsed_data->technical_skills->pluck('description')->implode(', ') . ', ' .
+                $parsed_data->technical_skills->pluck('description')->implode(', ') . ', ' .
                 $parsed_data->soft_skills->pluck('description')->implode(', ') . ', ' .
                 $parsed_data->strengths->pluck('description')->implode(', '),
             'experience' => $parsed_data->experiences->pluck('description')->implode(', ') . $parsed_data->summary_text,
             'certificates' => $parsed_data->certificates->pluck('description')->implode(', '),
         ]);
+
+        if ($response->successful()) {
+            $this->storeRecommendations($response->json(), $parsed_data->id);
+        }
 
         if ($response->failed()) {
             return [];
@@ -220,11 +224,14 @@ class ResumeTransactionUtil
 
     public function getProfileData($user_id)
     {
-        $user = User::with(['cv_lists' => function ($query) {
-            $query->latest();
-        }, 'cv_lists.parsedData' => function ($query) {
-            $query->with(['strengths', 'weaknesses', 'technical_skills', 'soft_skills', 'certificates', 'experiences', 'job_recommendations']);
-        }])->findOrFail($user_id);
+        $user = User::with([
+            'cv_lists' => function ($query) {
+                $query->latest();
+            },
+            'cv_lists.parsedData' => function ($query) {
+                $query->with(['strengths', 'weaknesses', 'technical_skills', 'soft_skills', 'certificates', 'experiences', 'job_recommendations.jobs']);
+            }
+        ])->findOrFail($user_id);
 
         if ($user->cv_lists->isEmpty()) {
             return response()->json([
@@ -252,10 +259,12 @@ class ResumeTransactionUtil
                 'job_recommendations' => $parsedData->job_recommendations->map(function ($item) {
                     return [
                         'job_title' => $item->job_title,
-                        'match_score' => $item->match_score,
-                        'company_name' => $item->company_name,
-                        'matched_skills' => isset($item->matched_skills) ? json_encode($item->matched_skills) : null,
-                        'link' => $item->link ?? null
+                        'match_percentage' => $item->match_percentage,
+                        'matched_jobs' => Job::where('title', 'LIKE', "%{$item->job_title}%")
+                            ->orderBy('salary_max', 'desc')
+                            ->orderBy('salary_min', 'desc')
+                            ->limit(10)
+                            ->get()
                     ];
                 }),
             ];
@@ -274,15 +283,14 @@ class ResumeTransactionUtil
         ]);
     }
 
-
     public function prepareDataSet($parsed_data, $jobs_list)
     {
         $cv_data = [
-            'experiences'      => $parsed_data->experiences->pluck('description')->toArray(),
-            'certificates'     => $parsed_data->certificates->pluck('description')->toArray(),
-            'soft_skills'      => $parsed_data->soft_skills->pluck('description')->toArray(),
+            'experiences' => $parsed_data->experiences->pluck('description')->toArray(),
+            'certificates' => $parsed_data->certificates->pluck('description')->toArray(),
+            'soft_skills' => $parsed_data->soft_skills->pluck('description')->toArray(),
             'technical_skills' => $parsed_data->technical_skills->pluck('description')->toArray(),
-            'strengths'        => $parsed_data->strengths->pluck('description')->toArray(),
+            'strengths' => $parsed_data->strengths->pluck('description')->toArray(),
         ];
 
         $jobs_data = $jobs_list->map(function ($job) {
@@ -298,48 +306,119 @@ class ResumeTransactionUtil
         })->toArray();
 
         return [
-            'cv_data'   => json_encode($cv_data),
+            'cv_data' => json_encode($cv_data),
             'jobs_data' => json_encode($jobs_data),
         ];
     }
 
-    //ollam server request
-    public function ollamRead($text)
+    public function storeRecommendations($response, $parsed_data_id)
     {
-        $base64Text = base64_encode($text);
-
-        $model = 'llama3.2:1b';
-
-        $prompt = "
-                You are a professional CV analyzer. Analyze the following CV text and return a VALID JSON object with fields:
-                - experiences (array of strings)
-                - soft_skills (array of strings)
-                - technical_skills (array of strings)
-                - weaknesses (array of strings)
-                - summary (short paragraph)
-                - strengths (array of strings)
-                - certifications (array of strings)
-
-                CV Text:
-                \"\"\"{$base64Text}\"\"\"
-                ";
-
-        $response = Http::timeout(180)->post(
-            'http://44.220.55.233:11434/api/generate',
-            [
-                'model' => 'llama3.2:1b',
-                'prompt' => $prompt,
-                'stream' => false,
-                'format' => 'json'
-            ]
-        );
-
-        if ($response->successful()) {
-            $data = $response->json();
-            dd($data);
-            return $data;
-        } else {
-            return $response->body();
+        if (empty($response)) {
+            return;
         }
+
+        $jobData = [];
+
+        if (isset($response['best_match']['job_title'])) {
+            $jobData[] = [
+                'title' => $response['best_match']['job_title'],
+                'percentage' => $response['best_match']['score'] ?? ($response['best_match']['match_percentage'] ?? null)
+            ];
+        }
+
+        if (isset($response['recommendations']) && is_array($response['recommendations'])) {
+            foreach ($response['recommendations'] as $rec) {
+                if (is_array($rec)) {
+                    $jobData[] = [
+                        'title' => $rec['job_title'] ?? null,
+                        'percentage' => $rec['score'] ?? ($rec['match_percentage'] ?? null)
+                    ];
+                } else {
+                    $jobData[] = [
+                        'title' => $rec,
+                        'percentage' => null
+                    ];
+                }
+            }
+        }
+
+        if (empty($jobData) && is_array($response)) {
+            foreach ($response as $item) {
+                if (is_string($item)) {
+                    $jobData[] = ['title' => $item, 'percentage' => null];
+                }
+            }
+        }
+
+        if ($parsed_data_id) {
+            $seenTitles = [];
+            foreach ($jobData as $data) {
+                if ($data['title'] && !in_array($data['title'], $seenTitles)) {
+                    JobRecommendation::create([
+                        'parsed_data_id' => $parsed_data_id,
+                        'job_title' => $data['title'],
+                        'match_percentage' => (float)($data['percentage'] ?? 0)
+                    ]);
+                    $seenTitles[] = $data['title'];
+                }
+            }
+        }
+    }
+    public function getClientProfile($user_id)
+    {
+        $user = User::with([
+            'cv_lists' => function ($query) {
+                $query->latest()->limit(1);
+            },
+            'cv_lists.parsedData' => function ($query) {
+                $query->with([
+                    'strengths',
+                    'weaknesses',
+                    'technical_skills',
+                    'soft_skills',
+                    'certificates',
+                    'experiences',
+                    'job_recommendations.jobs'
+                ]);
+            }
+        ])->findOrFail($user_id);
+
+        $resume = $user->cv_lists->first();
+
+        if (!$resume || !$resume->parsedData) {
+            return [
+                'status' => 'error',
+                'message' => 'No resume data found'
+            ];
+        }
+
+        $parsedData = $resume->parsedData;
+
+        return [
+            'user' => [
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+            'resume_details' => [
+                'cv_url' => asset($resume->file_path),
+                'summary' => $parsedData->summary_text,
+                'strengths' => $parsedData->strengths->pluck('description'),
+                'weaknesses' => $parsedData->weaknesses->pluck('description'),
+                'technical_skills' => $parsedData->technical_skills->pluck('description'),
+                'soft_skills' => $parsedData->soft_skills->pluck('description'),
+                'certificates' => $parsedData->certificates->pluck('description'),
+                'experiences' => $parsedData->experiences->pluck('description'),
+            ],
+            'recommendations' => $parsedData->job_recommendations->map(function ($item) {
+                return [
+                    'recommended_title' => $item->job_title,
+                    'top_jobs' => Job::where('title', 'LIKE', "%{$item->job_title}%")
+                        ->orderBy('salary_max', 'desc')
+                        ->orderBy('salary_min', 'desc')
+                        ->limit(10)
+                        ->get()
+                ];
+            })
+        ];
     }
 }

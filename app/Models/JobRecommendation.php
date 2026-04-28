@@ -7,15 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class JobRecommendation extends Model
 {
-    protected $fillable = ['parsed_data_id', 'job_id', 'job_title', 'company_name', 'job_description', 'match_score', 'matched_skills', 'link'];
+    protected $fillable = ['parsed_data_id', 'job_title', 'match_percentage'];
 
     public function parsedData()
     {
         return $this->belongsTo(ParsedData::class);
     }
 
-    public function job()
+    public function jobs()
     {
-        return $this->belongsTo(Job::class);
+        return $this->hasMany(Job::class, 'title', 'job_title')
+            ->orderBy('salary_max', 'desc')
+            ->orderBy('salary_min', 'desc');
     }
 }
