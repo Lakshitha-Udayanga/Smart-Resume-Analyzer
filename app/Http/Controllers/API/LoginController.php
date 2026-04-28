@@ -98,11 +98,33 @@ class LoginController extends Controller
                 ], 404);
             }
 
-            $user->delete();
+            \Illuminate\Support\Facades\DB::transaction(function () use ($user) {
+                foreach ($user->cv_lists as $resume) {
+                    $parsedData = $resume->parsedData;
+                    if ($parsedData) {
+                        $parsedData->strengths()->delete();
+                        $parsedData->weaknesses()->delete();
+                        $parsedData->technical_skills()->delete();
+                        $parsedData->soft_skills()->delete();
+                        $parsedData->certificates()->delete();
+                        $parsedData->experiences()->delete();
+                        $parsedData->job_recommendations()->delete();
+                        $parsedData->delete();
+                    }
+                    $resume->delete();
+                }
+
+                // Delete related notifications
+                \App\Models\Notification::where('notifiable_id', $user->id)
+                    ->where('type', 'client')
+                    ->delete();
+
+                $user->delete();
+            });
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'User deleted successfully'
+                'message' => 'User and all associated data deleted successfully'
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
