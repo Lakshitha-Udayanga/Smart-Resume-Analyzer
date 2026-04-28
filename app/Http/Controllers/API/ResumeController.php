@@ -68,8 +68,6 @@ class ResumeController extends Controller
 
             $jobs_list = $this->resumeTransactionUtil->getJobsList($job_recommendation_title);
 
-            $data_set_array = $this->resumeTransactionUtil->prepareDataSet($parsed_data, $jobs_list);
-
             return response()->json([
                 'status' => 'success',
                 'message' => 'Resume uploaded and analyzed successfully',
@@ -124,8 +122,6 @@ class ResumeController extends Controller
             $job_recommendations = $this->resumeTransactionUtil->getRecommendationsJobs($user_id, $resume, $parsed_data);
 
             $jobs_list = $this->resumeTransactionUtil->getJobsList($job_recommendations);
-
-            // $data_set_array = $this->resumeTransactionUtil->prepareDataSet($parsed_data, $jobs_list);
 
             return view('test_pdf.pdf_upload', compact('ai_result', 'job_recommendations', 'jobs_list'));
         } catch (Exception $e) {

@@ -39,8 +39,7 @@
                             <li><a class="dropdown-item" href="{{ url('registered/client') }}"><i
                                         class='bx bx-user-voice'></i>
                                     Client List</a></li>
-                            <li><a class="dropdown-item" href="{{ url('resumes') }}"><i
-                                        class='bx bx-file'></i>
+                            <li><a class="dropdown-item" href="{{ url('resumes') }}"><i class='bx bx-file'></i>
                                     Resume List</a></li>
                         </ul>
                     </li>
@@ -70,79 +69,6 @@
                             <div class="parent-icon"><i class='bx bx-test-tube'></i></div>
                             <div class="menu-title d-flex align-items-center">Unit Testing</div>
                         </a>
-                    </li>
-
-                    <li class="nav-item dropdown" hidden>
-                        <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"
-                            data-bs-toggle="dropdown">
-                            <div class="parent-icon"><i class='bx bx-lock'></i>
-                            </div>
-                            <div class="menu-title d-flex align-items-center">Authentication</div>
-                            <div class="ms-auto dropy-icon"><i class='bx bx-chevron-down'></i></div>
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown" hidden>
-                        <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"
-                            data-bs-toggle="dropdown">
-                            <div class="parent-icon"><i class='bx bx-briefcase-alt'></i>
-                            </div>
-                            <div class="menu-title d-flex align-items-center">UI Elements</div>
-                            <div class="ms-auto dropy-icon"><i class='bx bx-chevron-down'></i></div>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li> <a class="dropdown-item" href="{{ url('widgets') }}"><i
-                                        class='bx bx-wine'></i>Widgets</a></li>
-                            <li class="nav-item dropend">
-                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"><i
-                                        class='bx bx-cart'></i>eCommerce</a>
-                                <ul class="dropdown-menu submenu">
-                                </ul>
-                            </li>
-                            <li class="nav-item dropend">
-                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"><i
-                                        class='bx bx-ghost'></i>Components</a>
-                                <ul class="dropdown-menu scroll-menu">
-
-                                </ul>
-                            </li>
-                            <li class="nav-item dropend">
-                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret"
-                                    href="javascript:;"><i class='bx bx-card'></i>Content</a>
-                                <ul class="dropdown-menu submenu">
-                                </ul>
-                            </li>
-                            <li class="nav-item dropend">
-                                <a class="dropdown-item dropdown-toggle dropdown-toggle-nocaret"
-                                    href="javascript:;"><i class='bx bx-droplet'></i>Icons</a>
-                                <ul class="dropdown-menu submenu">
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown" hidden>
-                        <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"
-                            data-bs-toggle="dropdown">
-                            <div class="parent-icon"><i class='bx bx-line-chart'></i>
-                            </div>
-                            <div class="menu-title d-flex align-items-center">Charts</div>
-                            <div class="ms-auto dropy-icon"><i class='bx bx-chevron-down'></i></div>
-                        </a>
-                        <ul class="dropdown-menu">
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown" hidden>
-                        <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="javascript:;"
-                            data-bs-toggle="dropdown">
-                            <div class="parent-icon"><i class="bx bx-grid-alt"></i>
-                            </div>
-                            <div class="menu-title d-flex align-items-center">Management</div>
-                            <div class="ms-auto dropy-icon"><i class='bx bx-chevron-down'></i></div>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url('table-basic-table') }}"><i
-                                        class='bx bx-user-check'></i>
-                                    </i>User Managemnet</a></li>
-                        </ul>
                     </li>
                 </ul>
             </div>

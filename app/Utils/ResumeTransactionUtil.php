@@ -211,7 +211,11 @@ class ResumeTransactionUtil
             return collect([]);
         }
 
-        return Job::where('title', 'LIKE', "%{$title}%")->limit(10)->get();
+        return Job::where('title', 'LIKE', "%{$title}%")
+            ->orderBy('salary_max', 'desc')
+            ->orderBy('salary_min', 'desc')
+            ->limit(10)
+            ->get();
     }
 
     public function getProfileData($user_id)
