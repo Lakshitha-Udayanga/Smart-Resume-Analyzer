@@ -185,7 +185,7 @@ class ResumeTransactionUtil
         ]);
 
         // ml model data
-        $response = Http::post('http://3.80.103.73:5000/predict', [
+        $response = Http::post('http://52.90.229.61:5000/predict', [
             'skills' =>
                 $parsed_data->technical_skills->pluck('description')->implode(', ') . ', ' .
                 $parsed_data->soft_skills->pluck('description')->implode(', ') . ', ' .
